@@ -292,8 +292,8 @@ class CheckoutMutations {
   ''';
 
   static const String checkoutPaymentIntentStripeMutation = '''
-    mutation CheckoutPaymentIntentStripe(\$email: String!, \$paymentMethod: String!, \$successUrl: String!, \$checkoutId: String!) {
-      checkoutPaymentIntentStripe(email: \$email, payment_method: \$paymentMethod, success_url: \$successUrl, checkoutId: \$checkoutId) {
+    mutation CheckoutPaymentIntentStripe(\$checkoutId: String!) {
+      checkoutPaymentIntentStripe(checkoutId: \$checkoutId) {
       client_secret
       }
     }
@@ -393,17 +393,10 @@ class CheckoutMutations {
   }
 
   static Future<Map<String, dynamic>?> checkoutPaymentIntentStripe(
-      GraphQLClient client,
-      String email,
-      String paymentMethod,
-      String successUrl,
-      String checkoutId) async {
+      GraphQLClient client, String checkoutId) async {
     final MutationOptions options = MutationOptions(
       document: gql(checkoutPaymentIntentStripeMutation),
       variables: {
-        'email': email,
-        'paymentMethod': paymentMethod,
-        'successUrl': successUrl,
         'checkoutId': checkoutId,
       },
     );

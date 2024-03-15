@@ -36,17 +36,11 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
     AppState appState = Provider.of<AppState>(context, listen: false);
     final GraphQLClient client = GraphQLProvider.of(context).value;
 
-    final email = widget.email;
-    final paymentMethod = "Stripe";
-    final successUrl = "https://example.com/success";
     String checkoutId = appState.checkoutState['id'];
 
     try {
       final result = await CheckoutMutations.checkoutPaymentIntentStripe(
         client,
-        email,
-        paymentMethod,
-        successUrl,
         checkoutId,
       );
 
