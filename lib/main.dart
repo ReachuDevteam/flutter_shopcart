@@ -23,7 +23,7 @@ void main() async {
       GraphQLConfiguration.clientToQuery();
 
   String? cartId = await CartMutations.executeCreateCartMutation(
-    client.value, // El cliente GraphQL
+    client.value, // The GraphQL client
     customerSessionId: generatedUuid,
     currency: CURRENCY_INIT,
   ).then((result) => result?['cart_id']);

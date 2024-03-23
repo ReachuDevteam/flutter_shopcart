@@ -25,7 +25,7 @@ class Product {
       price: json['price']['amount'],
       currencyCode: json['price']['currencyCode'],
       imageUrl: json['images'][0]
-          ['url'], // Asume que siempre hay al menos una imagen
+          ['url'], // Assumes there is always at least one image.
     );
   }
 }

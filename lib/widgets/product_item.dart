@@ -79,7 +79,7 @@ class _ProductItemState extends State<ProductItem> {
       if (result != null) {
         appState.removeCartItem(cartItemId);
       } else {
-        // Si result es null, manejamos el caso como un error.
+        // If result is null, we handle the case as an error.
         throw Exception("Error removing product from cart: result is null");
       }
     } catch (e) {
