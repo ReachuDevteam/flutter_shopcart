@@ -53,10 +53,10 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
           ),
         );
       } else {
-        print("No se pudo obtener el clientSecret");
+        print("Could not obtain the clientSecret");
       }
     } catch (e) {
-      print("Error al inicializar el PaymentSheet: $e");
+      print("Error when initializing the PaymentSheet: $e");
     }
   }
 
@@ -108,9 +108,9 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
         children: [
           ElevatedButton(
             onPressed: () async {
-              // Asegura la inicialización antes de presentar el PaymentSheet
+              // Ensures initialization before submitting the PaymentSheet
               await initPaymentSheet();
-              // Presenta el PaymentSheet al usuario
+              // Presents the PaymentSheet to the user
               await presentPaymentSheet();
             },
             style: ElevatedButton.styleFrom(

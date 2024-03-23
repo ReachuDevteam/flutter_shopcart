@@ -54,7 +54,8 @@ class _ProductItemState extends State<ProductItem> {
         throw Exception("Product could not be added to cart.");
       }
     } catch (e) {
-      print(e); // Opcional: imprimir el error en la consola para depuración
+      // Optional: print the error in the console for debugging purposes
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content:
@@ -82,8 +83,8 @@ class _ProductItemState extends State<ProductItem> {
         throw Exception("Error removing product from cart: result is null");
       }
     } catch (e) {
-      // Aquí capturas cualquier excepción que ocurra durante la llamada a la API o procesamiento del resultado.
-      print(e); // Log para depuración
+      // Here you catch any exceptions that occur during the API call or result processing.
+      print(e); // Log for debugging
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text("Error removing product from cart: ${e.toString()}")),
@@ -148,8 +149,8 @@ class _ProductItemState extends State<ProductItem> {
               ],
             ),
             ProductDetailButton(
-                productId: int.parse(
-                    widget.product.id)), // Aquí integras tu ProductDetailButton
+                productId: int.parse(widget.product
+                    .id)), // Here you integrate your ProductDetailButton
             ElevatedButton(
               onPressed: () async {
                 if (isInCart) {

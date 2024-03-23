@@ -12,23 +12,23 @@ class ProductDetailButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Botón personalizado acorde a tu diseño
+    // Personalized button according to your design
     return ElevatedButton(
       onPressed: () => _showProductDetail(context, productId),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent, // Color de fondo
-        foregroundColor: Colors.white, // Color del contenido (texto, icono)
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30), // Borde redondeado
+          borderRadius: BorderRadius.circular(30),
         ),
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.info_outline, color: Colors.white), // Icono del botón
+          Icon(Icons.info_outline, color: Colors.white),
           SizedBox(width: 8),
-          Text('Details') // Texto del botón
+          Text('Details')
         ],
       ),
     );
@@ -38,12 +38,12 @@ class ProductDetailButton extends StatelessWidget {
     final appState = Provider.of<AppState>(context, listen: false);
     final GraphQLClient client = GraphQLProvider.of(context).value;
 
-    // Aquí haces tu llamada al servicio para obtener el detalle del producto.
+    // Here you make your service call to get the product detail..
     var product = await ProductQueries.executeChannelGetProductQuery(
         client, productId,
         currency: appState.selectedCurrency);
 
-    // Mostrar el detalle del producto en una hoja modal.
+    // Show the product detail in a modal sheet.
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -77,15 +77,12 @@ class ProductDetailButton extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Html(
-                    data: product.description, // Aquí va tu texto en HTML
-                    // Aquí puedes personalizar el estilo de los elementos HTML, si es necesario
+                    data: product.description,
                     style: {
                       "body": Style(
                         fontSize: FontSize(16.0),
-                        lineHeight: LineHeight.em(
-                            1.5), // Ajustar la altura de línea según necesites
+                        lineHeight: LineHeight.em(1.5),
                       ),
-                      // Añade más estilos para otros elementos si es necesario
                     },
                   ),
                   SizedBox(height: 20),

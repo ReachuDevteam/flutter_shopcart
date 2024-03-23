@@ -21,7 +21,7 @@ class _CartIconWidgetState extends State<CartIconWidget> {
             IconButton(
               icon: const Icon(
                 Icons.shopping_cart,
-                size: 30, // Aumenta el tamaño del ícono aquí
+                size: 30,
               ),
               onPressed: () {
                 showModalBottomSheet(
@@ -35,24 +35,20 @@ class _CartIconWidgetState extends State<CartIconWidget> {
                 right: 0,
                 top: 20,
                 child: Container(
-                  padding: const EdgeInsets.all(
-                      2), // Aumenta el padding para un círculo más grande
+                  padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     color: Colors.red,
-                    borderRadius: BorderRadius.circular(
-                        10), // Aumenta la curvatura del borde
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   constraints: const BoxConstraints(
-                    minWidth:
-                        24, // Aumenta el ancho mínimo para un contador más grande
-                    minHeight:
-                        24, // Aumenta el alto mínimo para un contador más grande
+                    minWidth: 24,
+                    minHeight: 24,
                   ),
                   child: Text(
                     '${appState.cartItems.length}',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 14, // Aumenta el tamaño de la fuente aquí
+                      fontSize: 14,
                     ),
                     textAlign: TextAlign.center,
                   ),

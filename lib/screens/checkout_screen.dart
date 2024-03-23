@@ -5,7 +5,7 @@ import 'package:demo2/graphql/mutations/checkout_mutations.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
-import '../state/app_state.dart'; // Asegúrate de que la ruta de importación sea correcta
+import '../state/app_state.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -173,7 +173,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       billingAddress['country'] = countriesData[countryCode]?['name'];
       shippingAddress['country'] = countriesData[countryCode]?['name'];
 
-      // Resetea la ciudad seleccionada ya que el país ha cambiado
+      // Reset the selected city as the country has changed.
       _selectedState = countriesData[countryCode]?['states']?.isNotEmpty == true
           ? countriesData[countryCode]['states'][0]
           : null;
@@ -309,7 +309,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             if (value == null || value.isEmpty) {
               return 'Field is required';
             }
-            return null; // No hay error
+            return null;
           },
         ),
         if (_showStateField)
@@ -359,7 +359,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       AppState appState = Provider.of<AppState>(context, listen: false);
       final GraphQLClient client = GraphQLProvider.of(context).value;
 
-      // Usa el operador ?? para caer de vuelta a los valores del formulario si checkoutState no tiene los datos necesarios.
+      // Uses the ?? operator to fall back to the form values if checkoutState does not have the necessary data.
       final email =
           appState.checkoutState['email'] as String? ?? this.email ?? '';
       final selectedCountryCode = appState.checkoutState['billingAddress']
@@ -376,7 +376,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           selectedPhoneCode,
           selectedCountryName);
 
-      // Determinar la dirección de envío dependiendo de si es la misma que la de facturación o no
+      // Determine the shipping address depending on whether it is the same as the billing address or not.
       Map<String, dynamic> shippingAddress;
       if (_sameAsBillingAddress) {
         shippingAddress = billingAddress;
@@ -393,18 +393,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ? appState.checkoutState['shippingAddress']
                 : this.shippingAddress,
             email,
-            selectedPhoneCode, // Suponiendo que el código de teléfono para envío sea el mismo que el de facturación
-            selectedCountryName); // Suponiendo que el país de envío sea el mismo que el de facturación
+            selectedPhoneCode, // Assuming that the shipping phone code is the same as the billing phone code
+            selectedCountryName); // Assuming the country of shipment is the same as the billing country
       }
 
-      // Actualiza la mutación del carrito con el país de envío
+      // Update the cart mutation with the country of shipment.
       await CartMutations.executeUpdateCartMutation(
         client,
         cartId: appState.cartId,
         shippingCountry: selectedCountryCode.toUpperCase(),
       );
 
-      // Itera sobre los items del carrito y actualízalos si es necesario
+      // Iterate over the items in the cart and update them if necessary.
       for (var cartItem in appState.cartItems) {
         String? countryId = await findShippingCountryId(selectedCountryCode,
             appState.selectedCurrency, cartItem.productShipping);
@@ -442,7 +442,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String? findShippingCountryId(
       String countryCode, String currencyCode, List<dynamic>? productShipping) {
     if (productShipping == null) {
-      return null; // Retorna null si productShipping es null
+      return null; // Return null if productShipping is null
     }
 
     for (var shippingInfo in productShipping) {
@@ -459,7 +459,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         }
       }
     }
-    return null; // Retorna null si no se encuentra el id del país
+    return null; // Returns null if country id is not found
   }
 
   Map<String, dynamic> formatAddressForMutation(Map<String, dynamic> address,

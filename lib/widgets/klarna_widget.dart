@@ -76,7 +76,7 @@ class _KlarnaPaymentCardWidgetState extends State<KlarnaPaymentCardWidget> {
           ElevatedButton(
             onPressed: fetchKlarnaHtmlSnippet,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple, // Color distintivo de Klarna
+              backgroundColor: Colors.purple,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               textStyle:

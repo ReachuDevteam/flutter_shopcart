@@ -133,7 +133,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   double calculateTotalPrice(List<CartItem> cartItems) {
     double totalPrice = 0.0;
 
-    // Suma el precio total de todos los productos en el carrito
+    // Add the total price of all products in the cart
     for (var item in cartItems) {
       totalPrice += item.quantity * item.unitPrice;
     }
@@ -142,53 +142,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   String getCurrency(List<CartItem> cartItems) {
-    // Obtiene la moneda del primer elemento en la lista de cartItems
+    //  Gets the currency of the first item in the cartItems list
     if (cartItems.isNotEmpty) {
       return cartItems.first.currency;
     } else {
-      return ''; // Si no hay elementos en el carrito, devuelve una cadena vacía
+      return ''; // If there are no items in the cart, returns an empty string.
     }
   }
-
-// Dentro de tu clase _PaymentScreenState
-  // void _processPayment() async {
-  //   AppState appState = Provider.of<AppState>(context, listen: false);
-  //   final GraphQLClient client = GraphQLProvider.of(context).value;
-
-  //   String checkoutId = appState.checkoutState['id'];
-
-  //   if (_selectedProvider == PaymentProvider.klarna) {
-  //     // Iniciar pago con Klarna
-  //     var result = await CheckoutMutations.checkoutInitPaymentKlarna(
-  //       client,
-  //       checkoutId,
-  //       appState.selectedCountry.toUpperCase(),
-  //       "https://www.example.com/confirmation.html", // URL de éxito
-  //       appState.checkoutState['email'], // Email del cliente
-  //     );
-
-  //     if (result != null) {
-  //       // Navegar al URL de pago de Klarna o manejar la respuesta según sea necesario
-  //       print("Payment with Klarna initiated");
-  //     } else {
-  //       print("Error initiating payment with Klarna");
-  //     }
-  //   } else if (_selectedProvider == PaymentProvider.stripe) {
-  //     // Iniciar pago con Stripe
-  //     var result = await CheckoutMutations.checkoutInitPaymentStripe(
-  //       client,
-  //       appState.checkoutState['email'], // Email del cliente
-  //       "Stripe", // Método de pago
-  //       "https://success.url", // URL de éxito
-  //       checkoutId,
-  //     );
-
-  //     if (result != null) {
-  //       // Navegar al URL de pago de Stripe o manejar la respuesta según sea necesario
-  //       print("Stripe payment initiated");
-  //     } else {
-  //       print("Error initiating payment with Stripe");
-  //     }
-  //   }
-  // }
 }

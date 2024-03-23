@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 import '../state/app_state.dart';
-import '../models/cartItem.dart'; // Asegúrate de tener este modelo definido
+import '../models/cartItem.dart';
 
 class CartSummaryWidget extends StatelessWidget {
   const CartSummaryWidget({super.key});
@@ -23,12 +23,12 @@ class CartSummaryWidget extends StatelessWidget {
       if (result != null) {
         appState.removeCartItem(cartItemId);
       } else {
-        // Si result es null, manejamos el caso como un error.
+        // If result is null, we handle the case as an error.
         throw Exception("Error removing product from cart: result is null");
       }
     } catch (e) {
-      // Aquí capturas cualquier excepción que ocurra durante la llamada a la API o procesamiento del resultado.
-      print(e); // Log para depuraciónx
+      // Here you catch any exceptions that occur during the API call or result processing.
+      print(e); // Log for debugging
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text("Error removing product from cart: ${e.toString()}")),
@@ -52,13 +52,12 @@ class CartSummaryWidget extends StatelessWidget {
       if (result != null) {
         appState.updateCartItemQuantity(cartItemId, qty);
       } else {
-        // Si result es null, manejamos el caso como un error.
-        throw Exception(
-            "Error al actualizar el producto del carrito: result es null");
+        // If result is null, we handle the case as an error.
+        throw Exception("Error updating product in cart: result is null");
       }
     } catch (e) {
-      // Aquí capturas cualquier excepción que ocurra durante la llamada a la API o procesamiento del resultado.
-      print(e); // Log para depuración
+      // Here you catch any exceptions that occur during the API call or result processing.
+      print(e); // Log for debugging
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text(
@@ -112,10 +111,9 @@ class CartSummaryWidget extends StatelessWidget {
                             await _handleRemoveFromCartItem(
                                 context, cartItem.cartItemId);
 
-                            // appState.removeCartItem(cartItem.cartItemId);
                             if (appState.cartItems.isEmpty) {
                               Navigator.pop(
-                                  context); // Cierra el resumen del carrito si está vacío
+                                  context); //  Closes the cart summary if it is empty
                             }
                           },
                         ),
@@ -141,7 +139,6 @@ class CartSummaryWidget extends StatelessWidget {
                 ],
               ),
             ),
-            // Puedes agregar aquí otros costos como impuestos o envío antes del total final
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

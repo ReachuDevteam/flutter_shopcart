@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final appState = Provider.of<AppState>(context, listen: false);
 
     if ((index == 1 || index == 2) && appState.cartItems.isEmpty) {
-      // Mostrar un mensaje indicando que el carrito está vacío
+      // Display a message indicating that the cart is empty
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text(
