@@ -1,11 +1,12 @@
 import 'package:demo2/models/cartItem.dart';
 import 'package:demo2/widgets/klarna_widget.dart';
+import 'package:demo2/widgets/stripe_link_widget.dart';
 import 'package:demo2/widgets/stripe_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 
-enum PaymentProvider { klarna, stripe }
+enum PaymentProvider { klarna, stripe, stripeLink }
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({Key? key}) : super(key: key);
@@ -112,8 +113,26 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 },
               ),
             ),
+            ListTile(
+              title: const Text('Stripe Link'),
+              leading: Radio<PaymentProvider>(
+                value: PaymentProvider.stripeLink,
+                groupValue: _selectedProvider,
+                onChanged: (PaymentProvider? value) {
+                  setState(() {
+                    _selectedProvider = value;
+                  });
+                },
+              ),
+            ),
             if (_selectedProvider == PaymentProvider.stripe)
               StripePaymentCardWidget(
+                email: email,
+                currency: currency,
+                totalAmount: total,
+              ),
+            if (_selectedProvider == PaymentProvider.stripeLink)
+              StripeLinkPaymentCardWidget(
                 email: email,
                 currency: currency,
                 totalAmount: total,
