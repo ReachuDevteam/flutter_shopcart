@@ -1,10 +1,12 @@
-import 'package:demo2/graphql/mutations/checkout_mutations.dart';
 import 'package:demo2/state/app_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:demo2/graphql/mutations/checkout_mutations.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:uni_links/uni_links.dart';
+import 'dart:async';
 
 class StripePaymentCardWidget extends StatefulWidget {
   final String email;
@@ -19,111 +21,142 @@ class StripePaymentCardWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<StripePaymentCardWidget> createState() =>
+  _StripePaymentCardWidgetState createState() =>
       _StripePaymentCardWidgetState();
 }
 
 class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
   bool? paymentSuccess;
+  StreamSubscription? _sub;
+
+  String url = "";
+  bool showWebView = false;
+  int orderId = -1;
+
+  Uri? successUri;
 
   @override
   void initState() {
     super.initState();
-    Stripe.publishableKey = '${dotenv.env['STRIPE_PUBLISHABLE_KEY']}';
+    successUri = Uri.parse(dotenv.env['URL_TYPE']!);
+    _initDeepLinkListener();
   }
 
-  Future<void> initPaymentSheet() async {
-    AppState appState = Provider.of<AppState>(context, listen: false);
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
 
-    String checkoutId = appState.checkoutState['id'];
-
-    try {
-      final result = await CheckoutMutations.checkoutPaymentIntentStripe(
-        client,
-        checkoutId,
-      );
-
-      if (result != null) {
-        final clientSecret = result['client_secret'];
-        await Stripe.instance.initPaymentSheet(
-          paymentSheetParameters: SetupPaymentSheetParameters(
-            paymentIntentClientSecret: clientSecret,
-            merchantDisplayName: 'Demo Shop',
-          ),
-        );
-      } else {
-        print("Could not obtain the clientSecret");
+  void _initDeepLinkListener() {
+    _sub = uriLinkStream.listen((Uri? uri) {
+      if (uri != null) {
+        _handleDeepLink(uri);
       }
-    } catch (e) {
-      print("Error when initializing the PaymentSheet: $e");
-    }
+    }, onError: (err) {
+      print("Error handling deep link: $err");
+    });
   }
 
-  Future<void> presentPaymentSheet() async {
-    try {
-      await Stripe.instance.presentPaymentSheet();
+  void _handleDeepLink(Uri uri) {
+    AppState appState = Provider.of<AppState>(context, listen: false);
+    String? cartIdFromUri = uri.queryParameters['cartId'];
+    String? checkoutIdFromUri = uri.queryParameters['checkoutId'];
+    String cartIdFromAppState = appState.cartId;
+    String checkoutIdFromAppState = appState.checkoutState['id'];
+
+    if (uri.scheme.toLowerCase() == successUri!.scheme.toLowerCase() &&
+        cartIdFromUri == cartIdFromAppState &&
+        checkoutIdFromUri == checkoutIdFromAppState) {
       setState(() {
         paymentSuccess = true;
       });
-    } catch (e) {
-      setState(() {
-        paymentSuccess = false;
-      });
     }
   }
 
-  Widget paymentStatusWidget() {
-    if (paymentSuccess == null) return SizedBox.shrink();
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: paymentSuccess! ? Colors.green : Colors.red,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            paymentSuccess! ? Icons.check_circle_outline : Icons.error_outline,
-            color: Colors.white,
-            size: 24,
-          ),
-          SizedBox(width: 10),
-          Text(
-            paymentSuccess! ? "Successful payment" : "Failed payment",
-            style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        ],
-      ),
-    );
+  Future<void> fetchStripeLinkSnippet() async {
+    AppState appState = Provider.of<AppState>(context, listen: false);
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+
+    final email = widget.email;
+    const paymentMethod = "Stripe";
+    String cartId = appState.cartId;
+    String checkoutId = appState.checkoutState['id'];
+
+    String successUrl =
+        "${dotenv.env['REDIRECT_APP_URL']!}?cartId=$cartId&checkoutId=$checkoutId";
+
+    try {
+      var result = await CheckoutMutations.checkoutInitPaymentStripe(
+        client,
+        email,
+        paymentMethod,
+        successUrl,
+        checkoutId,
+      );
+
+      if (result != null && result["order_id"] != null) {
+        setState(() {
+          orderId = result["order_id"];
+        });
+
+        String url = result["checkout_url"];
+        if (await canLaunch(url)) {
+          await launch(
+            url,
+            forceSafariVC: false,
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      }
+    } catch (e) {
+      print("Error fetching Stripe Link snippet: $e");
+    }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         children: [
           ElevatedButton(
-            onPressed: () async {
-              // Ensures initialization before submitting the PaymentSheet
-              await initPaymentSheet();
-              // Presents the PaymentSheet to the user
-              await presentPaymentSheet();
-            },
+            onPressed: fetchStripeLinkSnippet,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: Colors.blueGrey,
               foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              textStyle:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             child: Text(
-                'Pay ${widget.currency} ${widget.totalAmount.toStringAsFixed(2)}'),
+              'Pay with Stripe ${widget.currency} ${widget.totalAmount.toStringAsFixed(2)}',
+            ),
           ),
-          SizedBox(height: 20),
-          paymentStatusWidget(),
+          if (paymentSuccess == true)
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.amber,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.check_circle_outline, color: Colors.white),
+                  SizedBox(width: 10),
+                  Text(
+                    "Successful payment",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
