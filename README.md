@@ -8,13 +8,13 @@
 
 1. **Install Flutter**: First, ensure that Flutter is installed on your system. You can download it from Flutter's official website.  [https://docs.flutter.dev/get-started/install/macos/mobile-ios?tab=download](https://docs.flutter.dev/get-started/install/macos/mobile-ios?tab=download)
 2. **Create a New Project**: Open a terminal and execute the following command to create a new Flutter project:
-    
+
     ```bash
     flutter create {PROJECT_NAME}
     ```
-    
+
     This command generates a new Flutter project named **`demo2`**.
-    
+
 3. **Open the Project in an IDE**: Navigate to the project directory and open it with your preferred IDE (VS Code, Android Studio, etc.).
 
 ---
@@ -29,36 +29,36 @@ To include dependencies in your Flutter project, follow these steps, detailed he
 
 1. **Open Your `pubspec.yaml` File**: This file is located at the root of your Flutter project. It's used to define the project and manage the dependencies, assets, and other configurations.
 2. **Adding Dependencies**: Under the **`dependencies:`** section, list each dependency you want to include in your project along with the version numbers. Here's a basic structure:
-    
+
     ```yaml
     dependencies:
       flutter:
         sdk: flutter
       package_name: ^version_number
     ```
-    
+
     - **`flutter`**: This entry is mandatory for every Flutter project, signifying that your project depends on the Flutter SDK.
     - **`package_name`**: Replace this with the actual name of the package you wish to add.
     - **`^version_number`**: Replace this with the version number of the package. The caret symbol (**`^`**) before the version number tells Dart to automatically update the package if updates are available that do not include breaking changes.
 3. **Install the Dependencies**: After adding the dependencies to **`pubspec.yaml`**, run the following command in your terminal:
-    
+
     ```arduino
     flutter pub get
     ```
-    
+
     This command downloads the specified dependencies and their dependencies, making them available in your project.
-    
+
 4. **Importing Packages**: Once the dependencies are added and installed, you can import them into your Dart files using the **`import`** statement, like so:
-    
+
     ```dart
     import 'package:package_name/package_name.dart';
     ```
-    
+
 5. **Using the Packages**: After importing the packages, you can start using the functionalities provided by the packages in your application code.
 
 Remember, managing dependencies is a critical part of Flutter development. It allows you to leverage existing libraries and frameworks, reducing development time and effort. Always ensure you're using compatible versions to avoid conflicts and build issues.
 
-### Example **`pubspec.yaml`**:
+### Example **`pubspec.yaml`**
 
 ```yaml
 
@@ -444,3 +444,258 @@ To run and debug a Flutter project in Visual Studio Code (VSCode) using the Xcod
 Following these steps will enable you to run and debug your Flutter app on an iOS simulator using VSCode. This setup is ideal for rapid development and testing of your Flutter applications on iOS platforms.
 
 Let's delve into the critical components of your Flutter project, focusing on GraphQL integrations, state management, and Stripe SDK utilization, accompanied by code explanations to enrich your documentation.
+
+# Implementing Seamless Payment Redirections in Flutter for iOS Applications: A Comprehensive Guide
+
+### **Step 1: Open Your Project in Xcode**
+
+1. **Navigate** to your Flutter project folder.
+2. **Open** the **`ios`** folder within your project.
+3. **Find** and open the **`Runner.xcworkspace`** file to launch your project in Xcode.
+
+### **Step 2: Define Your URL Scheme**
+
+1. With your project open in Xcode, **select** the **`Runner`** project in the project navigator on the left to access the project's settings.
+2. **Go to** the **`Info`** tab at the top of the project settings area.
+3. Scroll down to the **`URL Types`** section. This is where you will add your new URL scheme.
+4. **Click** on the **`+`** (plus) button below the URL Types list to add a new URL type.
+5. **Configure** the new URL Type with the following information:
+    - **Identifier**: Provide a unique identifier for this URL scheme. This field is more for your reference and does not affect the URL scheme functionality. For example, you might use **`com.yourcompany.reachushopcart`**.
+    - **URL Schemes**: Enter the URL scheme you want your application to handle. This is the key value that iOS will use to open your app from a browser or another app. Ensure it is unique to avoid conflicts with other apps. For example, **`reachushopcart`**.
+6. **Save** your changes in Xcode.
+
+### **Step 3: Test Your URL Scheme**
+
+Once you have configured your URL scheme, you can test if it works correctly by attempting to open your app from Safari with the URL scheme you've defined. To do this:
+
+1. **Open** Safari on your iOS device or Simulator.
+2. **Type** your URL scheme in the address bar followed by **`://`**, for example: **`reachushopcart://`**.
+3. **Press** Go/Enter. If everything is configured correctly, your app should open.
+
+### **Important Notes**
+
+- Make sure the URL scheme you choose is unique to avoid conflicts with other apps installed on the device.
+- Remember, any changes to your project's configuration in Xcode should be tested on both the simulator and real devices to ensure it works as expected.
+- URL schemes are case-sensitive in some contexts, so be consistent in how you use them.
+
+Configuring deep links is a fundamental part to enhance user experience in your Flutter application, allowing for a smooth transition between your website or payment service and your application.
+
+![Reference](https://i.ibb.co/KW2hWHH/Captura-de-pantalla-2024-03-26-a-la-s-9-08-07-a-m.png)
+
+## **Step 4: Creation of the Redirect Page and Its Purpose**
+
+### **1. Example URL for Redirection**
+
+The URL to which the payment service will redirect after completing the payment is something like:
+
+```ruby
+rubyCopy code
+https://api-qa.reachu.io/api/checkout/payment/redirect-app-url?cartId={CART_ID}&checkoutId={CHECKOUT_ID}
+
+```
+
+This URL includes two important dynamic parameters:
+
+- **`{CART_ID}`**: A unique identifier for the user's shopping cart.
+- **`{CHECKOUT_ID}`**: A unique identifier for the checkout session.
+
+### **2. Node.js Method That Returns the HTML**
+
+The purpose of the **`redirectAppUrl`** method on your Node.js server is to capture the **`cartId`** and **`checkoutId`** parameters from the redirect URL and use them to dynamically generate an HTML page. This page has several key roles in the redirection flow:
+
+- **Inform the User**: Provides a thank-you message and confirms that the payment process has been successful.
+- **Prepare for Redirection**: Prepares the user for automatic redirection back to the mobile app using a deep link.
+- **Offer Manual Action**: Includes a button that allows the user to return to the app manually if they do not wish to wait for the automatic redirection.
+
+The generated HTML includes:
+
+- **CSS Styles**: To ensure that the page is visually attractive and clear to the user, enhancing the user experience during the redirection process.
+- **A "Go to App" Button**: This button uses the custom URL scheme defined for your application (**`ReachuShopCart://paymentSuccess`**) to open the app directly when the user clicks on it.
+- **Automatic Redirection**: A JavaScript script counts down 5 seconds before automatically redirecting the user back to the app using the same custom URL scheme.
+
+```jsx
+const redirectAppUrl = (req: Request, res: Response) => {
+  try {
+    const { cartId, checkoutId } = req.query;
+
+    if (cartId && checkoutId) {
+      const applicationUrl = `ReachuShopCart://paymentSuccess?cartId=${cartId}&checkoutId=${checkoutId}`;
+      const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Payment Successful</title>
+          <style>
+              body {
+                  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                  padding: 40px;
+                  text-align: center;
+                  background-color: #f4f4f4;
+              }
+              h2 {
+                  color: #333;
+              }
+              p {
+                  color: #666;
+              }
+              #progressBarContainer {
+                  width: 80%;
+                  background-color: #ddd;
+                  margin: 20px auto;
+                  height: 30px;
+                  border-radius: 15px;
+                  overflow: hidden;
+              }
+              #progressBar {
+                  width: 1%;
+                  height: 100%;
+                  background-color: #4CAF50;
+                  text-align: center;
+                  line-height: 30px;
+                  color: white;
+                  border-radius: 15px 0 0 15px;
+              }
+              .button {
+                  display: inline-block;
+                  padding: 10px 20px;
+                  background-color: #008CBA;
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 5px;
+                  margin-top: 20px;
+              }
+          </style>
+      </head>
+      <body>
+          <h2>Thank you for your purchase!</h2>
+          <p>You will be redirected back to the app shortly.</p>
+          <div id="progressBarContainer">
+              <div id="progressBar">0%</div>
+          </div>
+          <a href="#" class="button" id="redirectButton">Go to App</a>
+          <script>
+              const deepLink = "${applicationUrl}";
+      
+              document.getElementById('redirectButton').href = deepLink;
+      
+              setTimeout(function() {
+                  window.location.href = deepLink;
+              }, 5000);
+      
+              let progress = 0;
+              const interval = setInterval(function() {
+                  progress += 1;
+                  const progressBar = document.getElementById('progressBar');
+                  progressBar.style.width = progress + '%';
+                  progressBar.textContent = progress + '%';
+                  if (progress >= 100) clearInterval(interval);
+              }, 50);
+          </script>
+      </body>
+      </html>`;
+
+      return res.status(200).send(htmlContent);
+    }
+    return res.status(404).send('Data not found!');
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+};
+```
+
+### **Explanation of the HTML**
+
+The HTML served by this method is intentionally designed to be simple, clear, and functional. Here are some key design decisions explained:
+
+- **`<meta name="viewport">`**: Ensures the page is responsive and displays correctly on mobile devices.
+- **CSS Styles**: The styles are designed to be neutral and professional, ensuring that the page looks good on any device. The progress bar adds a visual element to indicate to the user that redirection is in progress.
+- **JavaScript for Redirection**: The inclusion of a timer to automatically redirect the user reinforces the feeling of a smooth and automated process, while offering the option of a manual button gives control to the user if they prefer to act immediately.
+
+This page acts as a bridge between the payment service and your mobile app, ensuring that users are redirected back to your app in an elegant and efficient manner after completing their purchase.
+
+## **Step 5: Flutter Implementation for Handling Redirections**
+
+### **Implementation Objectives**
+
+The implementation in Flutter aims to achieve several key objectives within the context of processing payments and redirecting from/to an external payment service:
+
+1. **Initiate the Payment Process**: Allow the user to initiate the payment process through an external service.
+2. **Handle Redirection Back to the App**: Ensure that, after payment, the user can be redirected back to the application to continue their user experience without interruptions.
+3. **Confirm the Payment Result**: Inform the user within the application about the success or failure of their payment transaction.
+
+### **Detailed Implementation**
+
+### **Initiate the Payment Process**
+
+```dart
+dartCopy code
+Future<void> fetchStripeLinkSnippet() async {
+  // Get the current state and necessary data for the payment process
+  final email = widget.email;
+  const paymentMethod = "Stripe";
+
+  // Construct the success URL that redirects back to the application
+  String successUrl = "${dotenv.env['REDIRECT_APP_URL']!}?cartId=$cartId&checkoutId=$checkoutId";
+
+  // Start the payment process by opening the Stripe URL
+  if (await canLaunch(url)) {
+    await launch(url, forceSafariVC: false);
+  } else {
+    throw 'Could not launch $url';
+  }
+}
+
+```
+
+- **Reason**: This snippet starts the payment process by opening a Stripe URL (or any other payment service). It ensures to open the URL externally (not in an integrated WebView), which is critical for enabling proper redirection out of the application.
+
+### **Listen and Handle Deep Links**
+
+```dart
+dartCopy code
+void initState() {
+  super.initState();
+  _initDeepLinkListener();
+}
+
+void _initDeepLinkListener() {
+  _sub = uriLinkStream.listen((Uri? uri) {
+    if (uri != null) {
+      _handleDeepLink(uri);
+    }
+  }, onError: (err) {
+    print("Error handling deep link: $err");
+  });
+}
+
+void _handleDeepLink(Uri uri) {
+  // Logic to handle the return URL and update the UI according to the payment result
+}
+
+```
+
+- **Reason**: This code sets up a listener for deep links, allowing the app to respond when it is opened through a deep link. It is essential to capture the redirection event back to the app after the user completes the payment process in an external browser.
+
+### **UI State Update**
+
+```dart
+dartCopy code
+if (uri.scheme.toLowerCase() == successUri!.scheme.toLowerCase() &&
+    cartIdFromUri == cartIdFromAppState &&
+    checkoutIdFromUri == checkoutIdFromAppState) {
+  setState(() {
+    paymentSuccess = true;
+  });
+}
+
+```
+
+- **Reason**: Once the deep link is captured, this code compares the received parameters with the expected ones, and if they match, updates the UI state to reflect the payment success. This allows for a smooth user experience, informing the user about the outcome of their payment action without the need for additional actions.
+
+### **Why It's Important**
+
+Implementing this flow ensures a cohesive and secure user experience, keeping the user within the application's ecosystem even when performing external actions like payments. By utilizing deep links and properly handling redirections, interruptions are minimized, and a clear narrative is maintained for the user, which is crucial for commercial and financial applications where trust and clarity are paramount.
+
+This implementation reflects best practices in modern mobile application development, leveraging the capabilities of the operating system and the Flutter ecosystem to create rich and fluid user experiences.
