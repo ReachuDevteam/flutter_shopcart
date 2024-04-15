@@ -2,145 +2,130 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 class CartItemMutations {
   static const String createItemToCartMutation = '''
-    mutation CreateItemToCart(\$cartId: String!, \$lineItems: [LineItemInput!]!) {
-      createItemToCart(cartId: \$cartId, line_items: \$lineItems) {
-        cart_id
-        customer_session_id
-        shippingCountry
-        line_items {
-          id
-          supplier
-          product_image {
+    mutation AddItem(\$cartId: String!, \$lineItems: [LineItemInput!]!) {
+      Cart {
+        AddItem(cart_id: \$cartId, line_items: \$lineItems) {
+          cart_id
+          customer_session_id
+          shipping_country
+          line_items {
             id
-            url
-            width
-            height
-          }
-          product_id
-          product_title
-          variant_id
-          variant_title
-          variant {
-            option
-            value
-          }
-          quantity
-          price {
-            amount
-            currencyCode
-            tax
-            discount
-            compareAt
-          }
-          shipping {
-            id
-            name
-            description
+            supplier
+            product_id
+            variant_id
+            variant_title
+            variant {
+              option
+              value
+            }
+            quantity
             price {
               amount
               currencyCode
+              tax
+              discount
+              compareAt
+            }
+            shipping {
+              id
+              name
+              description
+              price {
+                amount
+                currencyCode
+              }
             }
           }
+          total_amount
+          currency
+          available_shipping_countries
         }
-        total_amount
-        currency
-        available_shipping_countries
       }
     }
   ''';
 
   static const String updateItemToCartMutation = '''
-    mutation UpdateItemToCart(\$cartId: String!, \$cartItemId: String!, \$shippingId: String, \$qty: Int) {
-      updateItemToCart(cartId: \$cartId, cartItemId: \$cartItemId, shipping_id: \$shippingId, qty: \$qty) {
-         cart_id
-        customer_session_id
-        shippingCountry
-        line_items {
-          id
-          supplier
-          product_image {
+    mutation UpdateItem(\$cartId: String!, \$cartItemId: String!, \$shippingId: String, \$qty: Int) {
+      Cart {
+        UpdateItem(cart_id: \$cartId, cart_item_id: \$cartItemId, shipping_id: \$shippingId, qty: \$qty) {
+          cart_id
+          customer_session_id
+          shipping_country
+          line_items {
             id
-            url
-            width
-            height
-          }
-          product_id
-          product_title
-          variant_id
-          variant_title
-          variant {
-            option
-            value
-          }
-          quantity
-          price {
-            amount
-            currencyCode
-            tax
-            discount
-            compareAt
-          }
-          shipping {
-            id
-            name
-            description
+            supplier
+            product_id
+            variant_id
+            variant_title
+            variant {
+              option
+              value
+            }
+            quantity
             price {
               amount
               currencyCode
+              tax
+              discount
+              compareAt
+            }
+            shipping {
+              id
+              name
+              description
+              price {
+                amount
+                currencyCode
+              }
             }
           }
+          total_amount
+          currency
+          available_shipping_countries
         }
-        total_amount
-        currency
-        available_shipping_countries
       }
     }
   ''';
 
   static const String removeItemToCartMutation = """
-    mutation RemoveItemToCart(\$cartId: String!, \$cartItemId: String!) {
-      removeItemToCart(cartId: \$cartId, cartItemId: \$cartItemId) {
-        cart_id
-        customer_session_id
-        shippingCountry
-        line_items {
-          id
-          supplier
-          product_image {
+    mutation DeleteItem(\$cartId: String!, \$cartItemId: String!) {
+      Cart {
+        DeleteItem(cart_id: \$cartId, cart_item_id: \$cartItemId) {
+          cart_id
+          customer_session_id
+          shipping_country
+          line_items {
             id
-            url
-            width
-            height
-          }
-          product_id
-          product_title
-          variant_id
-          variant_title
-          variant {
-            option
-            value
-          }
-          quantity
-          price {
-            amount
-            currencyCode
-            tax
-            discount
-            compareAt
-          }
-          shipping {
-            id
-            name
-            description
+            supplier
+            product_id
+            variant_id
+            variant_title
+            variant {
+              option
+              value
+            }
+            quantity
             price {
               amount
               currencyCode
+              tax
+              discount
+              compareAt
+            }
+            shipping {
+              id
+              name
+              description
+              price {
+                amount
+                currencyCode
+              }
             }
           }
+          total_amount
+          currency
+          available_shipping_countries
         }
-        total_amount
-        currency
-        available_shipping_countries
       }
     }
   """;
@@ -160,7 +145,7 @@ class CartItemMutations {
       throw result.exception!;
     }
 
-    return result.data?['createItemToCart'];
+    return result.data?['Cart']?['AddItem'];
   }
 
   static Future<Map<String, dynamic>?> updateItemToCart(
@@ -181,7 +166,7 @@ class CartItemMutations {
       throw result.exception!;
     }
 
-    return result.data?['updateItemToCart'];
+    return result.data?['Cart']?['UpdateItem'];
   }
 
   static Future<Map<String, dynamic>?> removeItemFromCart(
@@ -200,6 +185,6 @@ class CartItemMutations {
       throw result.exception!;
     }
 
-    return result.data?['removeItemToCart'] as Map<String, dynamic>?;
+    return result.data?['Cart']?['DeleteItem'] as Map<String, dynamic>?;
   }
 }

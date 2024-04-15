@@ -446,7 +446,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     for (var shippingInfo in productShipping) {
-      var shippingCountries = shippingInfo['shippingCountry'] as List<dynamic>?;
+      var shippingCountries =
+          shippingInfo['shipping_country'] as List<dynamic>?;
       if (shippingCountries != null) {
         for (var country in shippingCountries) {
           var countryInfo = country as Map<String, dynamic>?;
