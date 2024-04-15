@@ -3,57 +3,92 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 class CartMutations {
   static const String createCartMutation = """
     mutation CreateCart(\$customerSessionId: String!, \$currency: String!) {
-      createCart(customerSessionId: \$customerSessionId, currency: \$currency) {
-        cart_id
-        currency
+      Cart {
+        CreateCart(customer_session_id: \$customerSessionId, currency: \$currency) {
+          cart_id
+          customer_session_id
+          shipping_country
+          line_items {
+            id
+            supplier
+            image {
+              id
+              url
+              width
+              height
+            }
+            product_id
+            variant_id
+            variant_title
+            variant {
+              option
+              value
+            }
+            quantity
+            price {
+              amount
+              currencyCode
+              tax
+              discount
+              compareAt
+            }
+            shipping {
+              id
+              name
+              description
+              price {
+                amount
+                currencyCode
+              }
+            }
+          }
+          total_amount
+          currency
+          available_shipping_countries
+        }
       }
     }
   """;
 
   static const String updateCartMutation = '''
     mutation UpdateCart(\$cartId: String!, \$shippingCountry: String!) {
-      updateCart(cartId: \$cartId, shipping_country: \$shippingCountry) {
-        cart_id
-        customer_session_id
-        shippingCountry
-        line_items {
-          id
-          supplier
-          product_image {
+      Cart {
+        UpdateCart(cart_id: \$cartId, shipping_country: \$shippingCountry) {
+          cart_id
+          customer_session_id
+          shipping_country
+          line_items {
             id
-            url
-            width
-            height
-          }
-          product_id
-          product_title
-          variant_id
-          variant_title
-          variant {
-            option
-            value
-          }
-          quantity
-          price {
-            amount
-            currencyCode
-            tax
-            discount
-            compareAt
-          }
-          shipping {
-            id
-            name
-            description
+            supplier
+            product_id
+            variant_id
+            variant_title
+            variant {
+              option
+              value
+            }
+            quantity
             price {
               amount
               currencyCode
+              tax
+              discount
+              compareAt
+            }
+            shipping {
+              id
+              name
+              description
+              price {
+                amount
+                currencyCode
+              }
             }
           }
+          total_amount
+          currency
+          available_shipping_countries
         }
-        total_amount
-        currency
-        available_shipping_countries
       }
     }
   ''';
@@ -77,7 +112,7 @@ class CartMutations {
       throw result.exception!;
     }
 
-    return result.data?['createCart'] as Map<String, dynamic>?;
+    return result.data?['Cart']?['CreateCart'] as Map<String, dynamic>?;
   }
 
   static Future<Map<String, dynamic>?> executeUpdateCartMutation(
@@ -99,6 +134,6 @@ class CartMutations {
       throw result.exception!;
     }
 
-    return result.data?['updateCart'] as Map<String, dynamic>?;
+    return result.data?['Cart']?['UpdateCart'] as Map<String, dynamic>?;
   }
 }

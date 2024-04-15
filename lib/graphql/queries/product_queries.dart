@@ -3,87 +3,78 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 class ProductQueries {
   static const String channelGetProductsQuery = """
-    query ChannelGetProducts(\$currency: String, \$imageSize: ImageSize) {
-      channelGetProducts(currency: \$currency, imageSize: \$imageSize) {
-        id
-        title
-        description
-        tags
-        sku
-        quantity
-        price {
-          amount
-          currencyCode
-          baseAmount
-          compareAt
-        }
-        variants {
+    query GetProducts(\$currency: String, \$imageSize: ImageSize) {
+      Channel {
+        GetProducts(currency: \$currency, image_size: \$imageSize) {
           id
-          barcode
-          quantity
-          sku
           title
-        }
-        barcode
-        options {
-          id
-          name
-          order
-          values
-        }
-        categories {
-          id
-          name
-        }
-        subcategories {
-          id
-          name
-        }
-        images {
-          id
-          url
-          width
-          height
-          order
-        }
-        productShipping {
-          id
-          name
           description
-          customPriceEnabled
-          default
-          shippingCountry {
-            id
+          tags
+          sku
+          quantity
+          price {
             amount
-            country
-            currencyCode
-            originalData {
+            currency_code
+            compare_at
+          }
+          variants {
+            id
+            barcode
+            quantity
+            sku
+            title
+          }
+          barcode
+          options {
+            id
+            name
+            order
+            values
+          }
+          categories {
+            id
+            name
+          }
+          images {
+            id
+            url
+            width
+            height
+            order
+          }
+          product_shipping {
+            id
+            name
+            description
+            custom_price_enabled
+            default
+            shipping_country {
+              id
               amount
+              country
               currencyCode
-              baseAmount
             }
           }
-        }
-        supplier
-        importedProduct
-        referralFee
-        optionsEnabled
-        digital
-        origin
-        return {
-          return_right
-          return_label
-          return_cost
-          supplier_policy
-          return_address {
-            sameAsBusiness
-            sameAsWarehouse
-            country
-            timezone
-            address
-            address2
-            postCode
-            returnCity
+          supplier
+          imported_product
+          options_enabled
+          digital
+          origin
+          return {
+            return_right
+            return_label
+            return_cost
+            supplier_policy
+            return_address {
+              sameAsBusiness
+              sameAsWarehouse
+              country
+              timezone
+              address
+              address2
+              postCode
+              returnCity
+            }
           }
         }
       }
@@ -91,87 +82,78 @@ class ProductQueries {
   """;
 
   static const String channelGetProductQuery = """
-    query ChannelGetProduct(\$currency: String, \$productId: Int, \$imageSize: ImageSize) {
-      channelGetProduct(currency: \$currency, productId: \$productId, imageSize: \$imageSize) {
-        id
-        title
-        description
-        tags
-        sku
-        quantity
-        price {
-          amount
-          currencyCode
-          baseAmount
-          compareAt
-        }
-        variants {
+    query GetProduct(\$currency: String, \$imageSize: ImageSize, \$sku: String, \$barcode: String, \$productId: Int) {
+      Channel {
+        GetProduct(currency: \$currency, image_size: \$imageSize, sku: \$sku, barcode: \$barcode, product_id: \$productId) {
           id
-          barcode
-          quantity
-          sku
           title
-        }
-        barcode
-        options {
-          id
-          name
-          order
-          values
-        }
-        categories {
-          id
-          name
-        }
-        subcategories {
-          id
-          name
-        }
-        images {
-          id
-          url
-          width
-          height
-          order
-        }
-        productShipping {
-          id
-          name
           description
-          customPriceEnabled
-          default
-          shippingCountry {
-            id
+          tags
+          sku
+          quantity
+          price {
             amount
-            country
-            currencyCode
-            originalData {
+            currency_code
+            compare_at
+          }
+          variants {
+            id
+            barcode
+            quantity
+            sku
+            title
+          }
+          barcode
+          options {
+            id
+            name
+            order
+            values
+          }
+          categories {
+            id
+            name
+          }
+          images {
+            id
+            url
+            width
+            height
+            order
+          }
+          product_shipping {
+            id
+            name
+            description
+            custom_price_enabled
+            default
+            shipping_country {
+              id
               amount
+              country
               currencyCode
-              baseAmount
             }
           }
-        }
-        supplier
-        importedProduct
-        referralFee
-        optionsEnabled
-        digital
-        origin
-        return {
-          return_right
-          return_label
-          return_cost
-          supplier_policy
-          return_address {
-            sameAsBusiness
-            sameAsWarehouse
-            country
-            timezone
-            address
-            address2
-            postCode
-            returnCity
+          supplier
+          imported_product
+          options_enabled
+          digital
+          origin
+          return {
+            return_right
+            return_label
+            return_cost
+            supplier_policy
+            return_address {
+              sameAsBusiness
+              sameAsWarehouse
+              country
+              timezone
+              address
+              address2
+              postCode
+              returnCity
+            }
           }
         }
       }
@@ -197,13 +179,16 @@ class ProductQueries {
       throw result.exception!;
     }
 
-    List<dynamic> data = result.data?['channelGetProducts'];
+    List<dynamic> data = result.data?['Channel']?['GetProducts'];
     return data.map((json) => Product.fromJson(json)).toList();
   }
 
   static Future<Product> executeChannelGetProductQuery(
       GraphQLClient client, int productId,
-      {String? currency, String imageSize = 'large'}) async {
+      {String? currency,
+      String? sku,
+      String? barcode,
+      String? imageSize = 'large'}) async {
     final QueryResult result = await client.query(
       QueryOptions(
         document: gql(channelGetProductQuery),
@@ -211,6 +196,8 @@ class ProductQueries {
           'currency': currency,
           'imageSize': imageSize,
           'productId': productId,
+          "barcode": barcode,
+          "sku": sku,
         },
       ),
     );
@@ -220,7 +207,7 @@ class ProductQueries {
       throw result.exception!;
     }
 
-    Map<String, dynamic> data = result.data?['channelGetProduct'];
+    Map<String, dynamic> data = result.data?['Channel']?['GetProduct'];
     return Product.fromJson(data);
   }
 }
