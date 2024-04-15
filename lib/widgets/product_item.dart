@@ -95,12 +95,12 @@ class _ProductItemState extends State<ProductItem> {
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
-    final isInCart = appState.cartItems
-        .any((item) => item.productId == int.parse(widget.product.id));
+    final isInCart =
+        appState.cartItems.any((item) => item.productId == widget.product.id);
     CartItem? cartItem;
     if (isInCart) {
       cartItem = appState.cartItems
-          .firstWhere((item) => item.productId == int.parse(widget.product.id));
+          .firstWhere((item) => item.productId == widget.product.id);
     }
 
     return Card(
@@ -149,8 +149,8 @@ class _ProductItemState extends State<ProductItem> {
               ],
             ),
             ProductDetailButton(
-                productId: int.parse(widget.product
-                    .id)), // Here you integrate your ProductDetailButton
+                productId: widget
+                    .product.id), // Here you integrate your ProductDetailButton
             ElevatedButton(
               onPressed: () async {
                 if (isInCart) {
@@ -160,9 +160,9 @@ class _ProductItemState extends State<ProductItem> {
                   CartItem _cartItem = CartItem(
                       title: widget.product.title,
                       currency: appState.selectedCurrency,
-                      productId: int.parse(widget.product.id),
+                      productId: widget.product.id,
                       quantity: _quantity,
-                      unitPrice: double.parse(widget.product.price),
+                      unitPrice: widget.product.price,
                       tax: 0,
                       image: widget.product.imageUrl,
                       productShipping: widget.product.productShipping,

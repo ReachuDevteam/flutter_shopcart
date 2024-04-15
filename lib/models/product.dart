@@ -1,8 +1,8 @@
 class Product {
-  final String id;
+  final int id;
   final String title;
   final String description;
-  final String price;
+  final double price;
   final String currencyCode;
   final String imageUrl;
   final List<Object?>? productShipping;
@@ -21,9 +21,9 @@ class Product {
       id: json['id'],
       title: json['title'],
       description: json['description'] ?? '',
-      productShipping: json['productShipping'],
+      productShipping: json['product_shipping'],
       price: json['price']['amount'],
-      currencyCode: json['price']['currencyCode'],
+      currencyCode: json['price']['currency_code'],
       imageUrl: json['images'][0]
           ['url'], // Assumes there is always at least one image.
     );

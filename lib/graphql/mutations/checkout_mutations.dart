@@ -3,298 +3,297 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 class CheckoutMutations {
   static const String createCheckoutMutation = '''
     mutation CreateCheckout(\$cartId: String!) {
-      createCheckout(cartId: \$cartId) {
-        createdAt
-        updatedAt
-        id
-        deletedAt
-        success_url
-        cancel_url
-        payment_method
-        email
-        status
-        checkout_url
-        origin_payment_id
-        total_price
-        total_tax
-        total_line_items_price
-        billing_address {
+      Checkout {
+        CreateCheckout(cart_id: \$cartId) {
+          created_at
+          updated_at
           id
-          first_name
-          last_name
-          phone_code
-          phone
-          company
-          address1
-          address2
-          city
-          province
-          province_code
-          country
-          country_code
-          zip
-        }
-        shipping_address {
-          id
-          first_name
-          last_name
-          phone_code
-          phone
-          company
-          address1
-          address2
-          city
-          province
-          province_code
-          country
-          country_code
-          zip
-        }
-        total_amount_shipping
-        availablePaymentMethods {
-          name
-        }
-        discount_code
-        total_discount
-        cart {
-          cart_id
-          customer_session_id
-          shippingCountry
-          line_items {
+          deleted_at
+          success_url
+          cancel_url
+          payment_method
+          email
+          status
+          checkout_url
+          origin_payment_id
+          total_amount
+          total_taxes_amount
+          total_cart_amount
+          billing_address {
             id
-            supplier
-            product_image {
+            first_name
+            last_name
+            phone_code
+            phone
+            company
+            address1
+            address2
+            city
+            province
+            province_code
+            country
+            country_code
+            zip
+          }
+          shipping_address {
+            id
+            first_name
+            last_name
+            phone_code
+            phone
+            company
+            address1
+            address2
+            city
+            province
+            province_code
+            country
+            country_code
+            zip
+          }
+          total_shipping_amount
+          available_payment_methods {
+            name
+          }
+          discount_code
+          total_discount
+          cart {
+            cart_id
+            customer_session_id
+            shipping_country
+            line_items {
               id
-              url
-              width
-              height
-            }
-            product_id
-            product_title
-            variant_id
-            variant_title
-            variant {
-              option
-              value
-            }
-            quantity
-            price {
-              amount
-              currencyCode
-              tax
-              discount
-              compareAt
-            }
-            shipping {
-              id
-              name
-              description
+              supplier
+              product_id
+              variant_id
+              variant_title
+              variant {
+                option
+                value
+              }
+              quantity
               price {
                 amount
                 currencyCode
+                tax
+                discount
+                compareAt
+              }
+              shipping {
+                id
+                name
+                description
+                price {
+                  amount
+                  currencyCode
+                }
               }
             }
+            total_amount
+            currency
+            available_shipping_countries
           }
-          total_amount
-          currency
-          available_shipping_countries
         }
       }
     }
   ''';
 
   static const String updateCheckoutMutation = '''
-    mutation UpdateCheckout(\$checkoutId: String!, \$email: String, \$billingAddress: AddressArgs, \$shippingAddress: AddressArgs) {
-      updateCheckout(checkoutId: \$checkoutId, email: \$email, billing_address: \$billingAddress, shipping_address: \$shippingAddress) {
-        createdAt
-        updatedAt
-        id
-        deletedAt
-        success_url
-        cancel_url
-        payment_method
-        email
-        status
-        checkout_url
-        origin_payment_id
-        total_price
-        total_tax
-        total_line_items_price
-        billing_address {
+    mutation UpdateCheckout(\$checkoutId: String!, \$status: String, \$email: String, \$successUrl: String, \$cancelUrl: String, \$paymentMethod: String, \$shippingAddress: AddressArgs, \$billingAddress: AddressArgs) {
+      Checkout {
+        UpdateCheckout(checkout_id: \$checkoutId, status: \$status, email: \$email, success_url: \$successUrl, cancel_url: \$cancelUrl, payment_method: \$paymentMethod, shipping_address: \$shippingAddress, billing_address: \$billingAddress) {
+          created_at
+          updated_at
           id
-          first_name
-          last_name
-          phone_code
-          phone
-          company
-          address1
-          address2
-          city
-          province
-          province_code
-          country
-          country_code
-          zip
-        }
-        shipping_address {
-          id
-          first_name
-          last_name
-          phone_code
-          phone
-          company
-          address1
-          address2
-          city
-          province
-          province_code
-          country
-          country_code
-          zip
-        }
-        total_amount_shipping
-        availablePaymentMethods {
-          name
-        }
-        discount_code
-        total_discount
-        cart {
-          cart_id
-          customer_session_id
-          shippingCountry
-          line_items {
+          deleted_at
+          success_url
+          cancel_url
+          payment_method
+          email
+          status
+          checkout_url
+          origin_payment_id
+          total_amount
+          total_taxes_amount
+          total_cart_amount
+          billing_address {
             id
-            supplier
-            product_image {
+            first_name
+            last_name
+            phone_code
+            phone
+            company
+            address1
+            address2
+            city
+            province
+            province_code
+            country
+            country_code
+            zip
+          }
+          shipping_address {
+            id
+            first_name
+            last_name
+            phone_code
+            phone
+            company
+            address1
+            address2
+            city
+            province
+            province_code
+            country
+            country_code
+            zip
+          }
+          total_shipping_amount
+          available_payment_methods {
+            name
+          }
+          discount_code
+          total_discount
+          cart {
+            cart_id
+            customer_session_id
+            shipping_country
+            line_items {
               id
-              url
-              width
-              height
-            }
-            product_id
-            product_title
-            variant_id
-            variant_title
-            variant {
-              option
-              value
-            }
-            quantity
-            price {
-              amount
-              currencyCode
-              tax
-              discount
-              compareAt
-            }
-            shipping {
-              id
-              name
-              description
+              supplier
+              product_id
+              variant_id
+              variant_title
+              variant {
+                option
+                value
+              }
+              quantity
               price {
                 amount
                 currencyCode
+                tax
+                discount
+                compareAt
+              }
+              shipping {
+                id
+                name
+                description
+                price {
+                  amount
+                  currencyCode
+                }
               }
             }
+            total_amount
+            currency
+            available_shipping_countries
           }
-          total_amount
-          currency
-          available_shipping_countries
         }
       }
     }
   ''';
 
   static const String checkoutInitPaymentKlarnaMutation = '''
-    mutation CheckoutInitPaymentKlarna(\$checkoutId: String!, \$countryCode: String!, \$href: String!, \$email: String!) {
-      checkoutInitPaymentKlarna(checkoutId: \$checkoutId, country_code: \$countryCode, href: \$href, email: \$email) {
-        order_id
-        status
-        purchase_country
-        purchase_currency
-        locale
-        billing_address {
-          given_name
-          family_name
-          email
-          street_address
-          postal_code
-          city
-          country
-        }
-        shipping_address {
-          given_name
-          family_name
-          email
-          street_address
-          postal_code
-          city
-          country
-        }
-        order_amount
-        order_tax_amount
-        total_line_items_price
-        order_lines {
-          type
-          name
-          quantity
-          unit_price
-          tax_rate
-          total_amount
-          total_discount_amount
-          total_tax_amount
+    mutation CreatePaymentKlarna(\$checkoutId: String!, \$countryCode: String!, \$href: String!, \$email: String!) {
+      Payment {
+        CreatePaymentKlarna(checkoutId: \$checkoutId, country_code: \$countryCode, href: \$href, email: \$email) {
+          order_id
+          status
+          purchase_country
+          purchase_currency
+          locale
+          billing_address {
+            given_name
+            family_name
+            email
+            street_address
+            postal_code
+            city
+            country
+          }
+          shipping_address {
+            given_name
+            family_name
+            email
+            street_address
+            postal_code
+            city
+            country
+          }
+          order_amount
+          order_tax_amount
+          total_line_items_price
+          order_lines {
+            type
+            name
+            quantity
+            unit_price
+            tax_rate
+            total_amount
+            total_discount_amount
+            total_tax_amount
+            merchant_data
+          }
+          merchant_urls {
+            terms
+            checkout
+            confirmation
+            push
+          }
+          html_snippet
+          started_at
+          last_modified_at
+          options {
+            allow_separate_shipping_address
+            date_of_birth_mandatory
+            require_validate_callback_success
+            phone_mandatory
+            auto_capture
+          }
+          shipping_options {
+            id
+            name
+            price
+            tax_amount
+            tax_rate
+            preselected
+          }
           merchant_data
-        }
-        merchant_urls {
-          terms
-          checkout
-          confirmation
-          push
-        }
-        html_snippet
-        started_at
-        last_modified_at
-        options {
-          allow_separate_shipping_address
-          date_of_birth_mandatory
-          require_validate_callback_success
-          phone_mandatory
-          auto_capture
-        }
-        shipping_options {
-          id
-          name
-          price
-          tax_amount
-          tax_rate
-          preselected
-        }
-        merchant_data
-        selected_shipping_option {
-          id
-          name
-          price
-          tax_amount
-          tax_rate
-          preselected
+          selected_shipping_option {
+            id
+            name
+            price
+            tax_amount
+            tax_rate
+            preselected
+          }
         }
       }
     }
   ''';
 
   static const String checkoutInitPaymentStripeMutation = '''
-    mutation CheckoutInitPaymentStripe(\$email: String!, \$paymentMethod: String!, \$successUrl: String!, \$checkoutId: String!) {
-      checkoutInitPaymentStripe(email: \$email, payment_method: \$paymentMethod, success_url: \$successUrl, checkoutId: \$checkoutId) {
-      checkout_url
-        order_id
+    mutation CreatePaymentIntentStripe(\$checkoutId: String!, \$successUrl: String!, \$paymentMethod: String!, \$email: String!) {
+      Payment {
+        CreatePaymentStripe(checkoutId: \$checkoutId, success_url: \$successUrl, payment_method: \$paymentMethod, email: \$email) {
+          checkout_url
+          order_id
+        }
       }
     }
   ''';
 
   static const String checkoutPaymentIntentStripeMutation = '''
-    mutation CheckoutPaymentIntentStripe(\$checkoutId: String!) {
-      checkoutPaymentIntentStripe(checkoutId: \$checkoutId) {
-      client_secret
+    mutation CreatePaymentIntentStripe(\$checkoutId: String!, \$returnEphemeralKey: Boolean) {
+      Payment {
+        CreatePaymentIntentStripe(checkout_id: \$checkoutId, return_ephemeral_key: \$returnEphemeralKey) {
+          client_secret
+          customer
+          publishable_key
+          ephemeral_key
+        }
       }
     }
   ''';
@@ -314,7 +313,7 @@ class CheckoutMutations {
       return null;
     }
 
-    return result.data?['createCheckout'];
+    return result.data?['Checkout']?['CreateCheckout'];
   }
 
   static Future<Map<String, dynamic>?> updateCheckout(
@@ -339,7 +338,7 @@ class CheckoutMutations {
       return null;
     }
 
-    return result.data?['updateCheckout'];
+    return result.data?['Checkout']?['UpdateCheckout'];
   }
 
   static Future<Map<String, dynamic>?> checkoutInitPaymentKlarna(
@@ -364,7 +363,7 @@ class CheckoutMutations {
       return null;
     }
 
-    return result.data?['checkoutInitPaymentKlarna'];
+    return result.data?['Payment']?['CreatePaymentKlarna'];
   }
 
   static Future<Map<String, dynamic>?> checkoutInitPaymentStripe(
@@ -389,7 +388,7 @@ class CheckoutMutations {
       return null;
     }
 
-    return result.data?['checkoutInitPaymentStripe'];
+    return result.data?['Payment']?['CreatePaymentStripe'];
   }
 
   static Future<Map<String, dynamic>?> checkoutPaymentIntentStripe(
@@ -407,6 +406,6 @@ class CheckoutMutations {
       return null;
     }
 
-    return result.data?['checkoutPaymentIntentStripe'];
+    return result.data?['Payment']?['CreatePaymentIntentStripe'];
   }
 }
