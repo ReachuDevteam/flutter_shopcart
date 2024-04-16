@@ -453,7 +453,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           var countryInfo = country as Map<String, dynamic>?;
           if (countryInfo != null) {
             if (countryInfo['country'] == countryCode.toUpperCase() &&
-                countryInfo['currencyCode'] == currencyCode) {
+                countryInfo['currency_code'] == currencyCode) {
               return countryInfo['id'] as String?;
             }
           }

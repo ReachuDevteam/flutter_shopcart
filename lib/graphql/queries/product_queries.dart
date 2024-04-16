@@ -52,11 +52,12 @@ class ProductQueries {
               id
               amount
               country
-              currencyCode
+              currency_code
             }
           }
           supplier
           imported_product
+          referral_fee
           options_enabled
           digital
           origin
@@ -66,14 +67,14 @@ class ProductQueries {
             return_cost
             supplier_policy
             return_address {
-              sameAsBusiness
-              sameAsWarehouse
+              same_as_business
+              same_as_warehouse
               country
               timezone
               address
-              address2
-              postCode
-              returnCity
+              address_2
+              post_code
+              return_city
             }
           }
         }
@@ -131,11 +132,12 @@ class ProductQueries {
               id
               amount
               country
-              currencyCode
+              currency_code
             }
           }
           supplier
           imported_product
+          referral_fee
           options_enabled
           digital
           origin
@@ -145,14 +147,14 @@ class ProductQueries {
             return_cost
             supplier_policy
             return_address {
-              sameAsBusiness
-              sameAsWarehouse
+              same_as_business
+              same_as_warehouse
               country
               timezone
               address
-              address2
-              postCode
-              returnCity
+              address_2
+              post_code
+              return_city
             }
           }
         }
