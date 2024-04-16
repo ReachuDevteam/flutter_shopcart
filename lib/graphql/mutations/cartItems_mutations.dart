@@ -21,10 +21,10 @@ class CartItemMutations {
             quantity
             price {
               amount
-              currencyCode
+              currency_code
               tax
               discount
-              compareAt
+              compare_at
             }
             shipping {
               id
@@ -32,7 +32,7 @@ class CartItemMutations {
               description
               price {
                 amount
-                currencyCode
+                currency_code
               }
             }
           }
@@ -54,6 +54,16 @@ class CartItemMutations {
           line_items {
             id
             supplier
+            image {
+              id
+              url
+              width
+              height
+            }
+            sku
+            barcode
+            brand
+            title
             product_id
             variant_id
             variant_title
@@ -64,10 +74,10 @@ class CartItemMutations {
             quantity
             price {
               amount
-              currencyCode
+              currency_code
               tax
               discount
-              compareAt
+              compare_at
             }
             shipping {
               id
@@ -75,7 +85,7 @@ class CartItemMutations {
               description
               price {
                 amount
-                currencyCode
+                currency_code
               }
             }
           }
@@ -97,6 +107,16 @@ class CartItemMutations {
           line_items {
             id
             supplier
+            image {
+              id
+              url
+              width
+              height
+            }
+            sku
+            barcode
+            brand
+            title
             product_id
             variant_id
             variant_title
@@ -107,10 +127,10 @@ class CartItemMutations {
             quantity
             price {
               amount
-              currencyCode
+              currency_code
               tax
               discount
-              compareAt
+              compare_at
             }
             shipping {
               id
@@ -118,7 +138,7 @@ class CartItemMutations {
               description
               price {
                 amount
-                currencyCode
+                currency_code
               }
             }
           }
