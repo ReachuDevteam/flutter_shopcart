@@ -64,6 +64,16 @@ class CheckoutMutations {
             line_items {
               id
               supplier
+              image {
+                id
+                url
+                width
+                height
+              }
+              sku
+              barcode
+              brand
+              title
               product_id
               variant_id
               variant_title
@@ -74,10 +84,10 @@ class CheckoutMutations {
               quantity
               price {
                 amount
-                currencyCode
+                currency_code
                 tax
                 discount
-                compareAt
+                compare_at
               }
               shipping {
                 id
@@ -85,7 +95,7 @@ class CheckoutMutations {
                 description
                 price {
                   amount
-                  currencyCode
+                  currency_code
                 }
               }
             }
@@ -161,6 +171,16 @@ class CheckoutMutations {
             line_items {
               id
               supplier
+              image {
+                id
+                url
+                width
+                height
+              }
+              sku
+              barcode
+              brand
+              title
               product_id
               variant_id
               variant_title
@@ -171,10 +191,10 @@ class CheckoutMutations {
               quantity
               price {
                 amount
-                currencyCode
+                currency_code
                 tax
                 discount
-                compareAt
+                compare_at
               }
               shipping {
                 id
@@ -182,7 +202,7 @@ class CheckoutMutations {
                 description
                 price {
                   amount
-                  currencyCode
+                  currency_code
                 }
               }
             }
@@ -198,7 +218,7 @@ class CheckoutMutations {
   static const String checkoutInitPaymentKlarnaMutation = '''
     mutation CreatePaymentKlarna(\$checkoutId: String!, \$countryCode: String!, \$href: String!, \$email: String!) {
       Payment {
-        CreatePaymentKlarna(checkoutId: \$checkoutId, country_code: \$countryCode, href: \$href, email: \$email) {
+        CreatePaymentKlarna(checkout_id: \$checkoutId, country_code: \$countryCode, href: \$href, email: \$email) {
           order_id
           status
           purchase_country
@@ -277,7 +297,7 @@ class CheckoutMutations {
   static const String checkoutInitPaymentStripeMutation = '''
     mutation CreatePaymentIntentStripe(\$checkoutId: String!, \$successUrl: String!, \$paymentMethod: String!, \$email: String!) {
       Payment {
-        CreatePaymentStripe(checkoutId: \$checkoutId, success_url: \$successUrl, payment_method: \$paymentMethod, email: \$email) {
+        CreatePaymentStripe(checkout_id: \$checkoutId, success_url: \$successUrl, payment_method: \$paymentMethod, email: \$email) {
           checkout_url
           order_id
         }
