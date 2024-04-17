@@ -40,9 +40,7 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
 
     try {
       final result = await CheckoutMutations.checkoutPaymentIntentStripe(
-        client,
-        checkoutId,
-      );
+          client, checkoutId, true);
 
       if (result != null) {
         final clientSecret = result['client_secret'];
