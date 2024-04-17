@@ -412,11 +412,12 @@ class CheckoutMutations {
   }
 
   static Future<Map<String, dynamic>?> checkoutPaymentIntentStripe(
-      GraphQLClient client, String checkoutId) async {
+      GraphQLClient client, String checkoutId, bool returnEphemeralKey) async {
     final MutationOptions options = MutationOptions(
       document: gql(checkoutPaymentIntentStripeMutation),
       variables: {
         'checkoutId': checkoutId,
+        'returnEphemeralKey': returnEphemeralKey,
       },
     );
 
