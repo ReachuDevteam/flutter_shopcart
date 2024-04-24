@@ -65,7 +65,7 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
     String cartIdFromAppState = appState.cartId;
     String checkoutIdFromAppState = appState.checkoutState['id'];
 
-    if (uri.scheme.toLowerCase() == successUri!.scheme.toLowerCase() &&
+    if (uri.scheme == successUri!.scheme &&
         cartIdFromUri == cartIdFromAppState &&
         checkoutIdFromUri == checkoutIdFromAppState) {
       setState(() {
@@ -83,8 +83,10 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
     String cartId = appState.cartId;
     String checkoutId = appState.checkoutState['id'];
 
+    String redirectApp = "redirectApp=${dotenv.env['URL_TYPE']}paymentSuccess";
+
     String successUrl =
-        "${dotenv.env['REDIRECT_APP_URL']!}?cartId=$cartId&checkoutId=$checkoutId";
+        "${dotenv.env['REDIRECT_APP_URL']!}?cartId=$cartId&checkoutId=$checkoutId&${redirectApp}";
 
     try {
       var result = await CheckoutMutations.checkoutInitPaymentStripe(
