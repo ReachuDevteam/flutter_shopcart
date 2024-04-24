@@ -38,6 +38,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _selectedCountryCode;
   String? _selectedState;
   bool _showStateField = true;
+  bool _acceptsTerms = true;
+  bool _acceptsPurchaseConditions = true;
 
   final Map<String, dynamic> countriesData = {
     // 'us': {
@@ -228,7 +230,48 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       style: Theme.of(context).textTheme.titleLarge),
                   _buildAddressFields('shipping'),
                 ],
+
                 const SizedBox(height: 16),
+                const SizedBox(
+                    height: 20), // Additional space before the instruction text
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Please make sure to read and accept the following conditions:',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                ),
+                CheckboxListTile(
+                  title: const Text("Accept Terms and Conditions"),
+                  value: _acceptsTerms,
+                  onChanged: null, // Disables interaction
+                  controlAffinity: ListTileControlAffinity.leading,
+                  secondary: Icon(Icons
+                      .lock_outline), // Optional: adds a lock icon to signify locked state
+                  activeColor:
+                      Colors.grey, // Dim color to indicate disabled state
+                  checkColor: Colors.white,
+                  tileColor: Colors.grey[
+                      200], // Optional: background color to enhance disabled visual
+                ),
+                CheckboxListTile(
+                  title: const Text("Accept Purchase Conditions"),
+                  value: _acceptsPurchaseConditions,
+                  onChanged: null, // Disables interaction
+                  controlAffinity: ListTileControlAffinity.leading,
+                  secondary: Icon(Icons
+                      .lock_outline), // Optional: adds a lock icon to signify locked state
+                  activeColor:
+                      Colors.grey, // Dim color to indicate disabled state
+                  checkColor: Colors.white,
+                  tileColor: Colors.grey[
+                      200], // Optional: background color to enhance disabled visual
+                ),
+                const SizedBox(height: 16),
+
                 Center(
                   child: ElevatedButton(
                     onPressed: _submitForm,
@@ -425,7 +468,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           await CheckoutMutations.createCheckout(client, appState.cartId);
 
       await CheckoutMutations.updateCheckout(
-          client, response?["id"], email, billingAddress, shippingAddress);
+          client,
+          response?["id"],
+          email,
+          billingAddress,
+          shippingAddress,
+          this._acceptsTerms,
+          this._acceptsPurchaseConditions);
 
       appState.setCheckoutState({
         "id": response?["id"],

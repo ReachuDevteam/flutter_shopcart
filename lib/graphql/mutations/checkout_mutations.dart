@@ -5,6 +5,8 @@ class CheckoutMutations {
     mutation CreateCheckout(\$cartId: String!) {
       Checkout {
         CreateCheckout(cart_id: \$cartId) {
+          buyer_accepts_purchase_conditions
+          buyer_accepts_terms_conditions
           created_at
           updated_at
           id
@@ -73,8 +75,8 @@ class CheckoutMutations {
               sku
               barcode
               brand
-              title
               product_id
+              title
               variant_id
               variant_title
               variant {
@@ -109,9 +111,33 @@ class CheckoutMutations {
   ''';
 
   static const String updateCheckoutMutation = '''
-    mutation UpdateCheckout(\$checkoutId: String!, \$status: String, \$email: String, \$successUrl: String, \$cancelUrl: String, \$paymentMethod: String, \$shippingAddress: AddressArgs, \$billingAddress: AddressArgs) {
+    mutation UpdateCheckout(
+      \$checkoutId: String!
+      \$buyerAcceptsTermsConditions: Boolean
+      \$buyerAcceptsPurchaseConditions: Boolean
+      \$billingAddress: AddressArgs
+      \$shippingAddress: AddressArgs
+      \$paymentMethod: String
+      \$cancelUrl: String
+      \$successUrl: String
+      \$email: String
+      \$status: String
+    ) {
       Checkout {
-        UpdateCheckout(checkout_id: \$checkoutId, status: \$status, email: \$email, success_url: \$successUrl, cancel_url: \$cancelUrl, payment_method: \$paymentMethod, shipping_address: \$shippingAddress, billing_address: \$billingAddress) {
+        UpdateCheckout(
+          checkout_id: \$checkoutId
+          buyer_accepts_terms_conditions: \$buyerAcceptsTermsConditions
+          buyer_accepts_purchase_conditions: \$buyerAcceptsPurchaseConditions
+          billing_address: \$billingAddress
+          shipping_address: \$shippingAddress
+          payment_method: \$paymentMethod
+          cancel_url: \$cancelUrl
+          success_url: \$successUrl
+          email: \$email
+          status: \$status
+        ) {
+          buyer_accepts_purchase_conditions
+          buyer_accepts_terms_conditions
           created_at
           updated_at
           id
@@ -180,8 +206,8 @@ class CheckoutMutations {
               sku
               barcode
               brand
-              title
               product_id
+              title
               variant_id
               variant_title
               variant {
@@ -341,7 +367,9 @@ class CheckoutMutations {
       String checkoutId,
       String email,
       Map<String, dynamic> billingAddress,
-      Map<String, dynamic> shippingAddress) async {
+      Map<String, dynamic> shippingAddress,
+      bool buyerAcceptsTermsConditions,
+      bool buyerAcceptsPurchaseConditions) async {
     final MutationOptions options = MutationOptions(
       document: gql(updateCheckoutMutation),
       variables: {
@@ -349,6 +377,8 @@ class CheckoutMutations {
         'email': email,
         'billingAddress': billingAddress,
         'shippingAddress': shippingAddress,
+        'buyerAcceptsTermsConditions': buyerAcceptsTermsConditions,
+        'buyerAcceptsPurchaseConditions': buyerAcceptsPurchaseConditions,
       },
     );
 
