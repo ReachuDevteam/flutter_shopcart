@@ -524,7 +524,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       "email": email,
       "first_name": address['first_name'],
       "last_name": address['last_name'],
-      "phone": int.parse(address['phone']),
+      "phone": address['phone'],
       "phone_code": phoneCode,
       "province": address['province'],
       "province_code": address['provinceCode'],
