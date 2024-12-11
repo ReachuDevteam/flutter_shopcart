@@ -6,77 +6,88 @@ class ProductQueries {
     query GetProducts(\$currency: String, \$imageSize: ImageSize) {
       Channel {
         GetProducts(currency: \$currency, image_size: \$imageSize) {
+            id
+      title
+      brand
+      description
+      tags
+      sku
+      quantity
+      price {
+        amount
+        currency_code
+        amount_incl_taxes
+        tax_amount
+        tax_rate
+        compare_at
+        compare_at_incl_taxes
+      }
+      variants {
+        id
+        barcode
+        quantity
+        sku
+        title
+      }
+      barcode
+      options {
+        id
+        name
+        order
+        values
+      }
+      categories {
+        id
+        name
+      }
+      images {
+        id
+        url
+        width
+        height
+        order
+      }
+      product_shipping {
+        id
+        name
+        description
+        custom_price_enabled
+        default
+        shipping_country {
           id
-          title
-          description
-          tags
-          sku
-          quantity
+          country
           price {
             amount
             currency_code
-            compare_at
+            amount_incl_taxes
+            tax_amount
+            tax_rate
           }
-          variants {
-            id
-            barcode
-            quantity
-            sku
-            title
-          }
-          barcode
-          options {
-            id
-            name
-            order
-            values
-          }
-          categories {
-            id
-            name
-          }
-          images {
-            id
-            url
-            width
-            height
-            order
-          }
-          product_shipping {
-            id
-            name
-            description
-            custom_price_enabled
-            default
-            shipping_country {
-              id
-              amount
-              country
-              currency_code
-            }
-          }
-          supplier
-          imported_product
-          referral_fee
-          options_enabled
-          digital
-          origin
-          return {
-            return_right
-            return_label
-            return_cost
-            supplier_policy
-            return_address {
-              same_as_business
-              same_as_warehouse
-              country
-              timezone
-              address
-              address_2
-              post_code
-              return_city
-            }
-          }
+        }
+      }
+      supplier
+      supplier_id
+      imported_product
+      referral_fee
+      options_enabled
+      digital
+      origin
+      return {
+        return_right
+        return_label
+        return_cost
+        supplier_policy
+        return_address {
+          same_as_business
+          same_as_warehouse
+          country
+          timezone
+          address
+          address_2
+          post_code
+          return_city
+        }
+      }
         }
       }
     }

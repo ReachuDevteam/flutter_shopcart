@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:demo2/state/app_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:demo2/graphql/mutations/checkout_mutations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+// Importes adicionales para la nueva implementación de WebView:
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class KlarnaPaymentCardWidget extends StatefulWidget {
   final String email;
@@ -29,9 +35,51 @@ class _KlarnaPaymentCardWidgetState extends State<KlarnaPaymentCardWidget> {
   bool showWebView = false;
   String orderId = "";
 
+  // Nuevo: controlador del WebView
+  late final WebViewController _controller;
+
   @override
   void initState() {
     super.initState();
+    // Configuración del controlador del WebView con la nueva API:
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    final WebViewController controller =
+        WebViewController.fromPlatformCreationParams(params);
+
+    controller
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (NavigationRequest request) {
+            final returnUrl =
+                '${dotenv.env['FAKE_RETURN_URL']}?order_id=$orderId&payment_processor=KLARNA';
+            if (request.url.contains(returnUrl)) {
+              setState(() {
+                showWebView = false;
+                paymentSuccess = true;
+              });
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
+        ),
+      );
+
+    // Ajuste de background según plataforma (opcional)
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      controller.setBackgroundColor(Colors.transparent);
+    }
+
+    _controller = controller;
   }
 
   Future<void> fetchKlarnaHtmlSnippet() async {
@@ -56,6 +104,9 @@ class _KlarnaPaymentCardWidgetState extends State<KlarnaPaymentCardWidget> {
           url =
               '${dotenv.env['REACHU_SERVER_URL']}/api/checkout/${checkoutId}/payment-klarna-html-body';
         });
+
+        // Cargar la URL en el WebViewController antes de mostrarlo
+        await _controller.loadRequest(Uri.parse(url));
 
         setState(() {
           showWebView = true;
@@ -89,22 +140,7 @@ class _KlarnaPaymentCardWidgetState extends State<KlarnaPaymentCardWidget> {
           showWebView
               ? SizedBox(
                   height: 1500,
-                  child: WebView(
-                    initialUrl: url,
-                    javascriptMode: JavascriptMode.unrestricted,
-                    navigationDelegate: (NavigationRequest request) {
-                      final returnUrl =
-                          '${dotenv.env['FAKE_RETURN_URL']}?order_id=$orderId&payment_processor=KLARNA';
-                      if (request.url.contains(returnUrl)) {
-                        setState(() {
-                          showWebView = false;
-                          paymentSuccess = true;
-                        });
-                        return NavigationDecision.prevent;
-                      }
-                      return NavigationDecision.navigate;
-                    },
-                  ),
+                  child: WebViewWidget(controller: _controller),
                 )
               : Container(),
           if (paymentSuccess == true)
