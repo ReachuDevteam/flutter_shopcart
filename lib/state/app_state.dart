@@ -1,24 +1,46 @@
 import 'package:demo2/models/cartItem.dart';
+import 'package:demo2/models/market.dart';
 import 'package:flutter/foundation.dart';
 import '../conts/data.dart';
 
 class AppState with ChangeNotifier {
   String _selectedCurrency = CURRENCY_INIT;
+  String _selectedCurrencySymbol = '';
   String _selectedCountry = COUNTRY_INIT;
   String _cartId = '';
   final List<CartItem> _cartItems = [];
   Map<String, dynamic> _checkoutState = {};
+  List<Market> _availableMarkets = [];
+  final Map<String, String> _selectedShippingForItems = {};
 
   AppScreen _selectedScreen = AppScreen.Products;
 
-  String get selectedCurrency {
-    debugPrint('Getting selected currency: $_selectedCurrency');
-    return _selectedCurrency;
+  String get selectedCurrency => _selectedCurrency;
+  String get selectedCurrencySymbol => _selectedCurrencySymbol;
+  String get selectedCountry => _selectedCountry;
+  List<Market> get availableMarkets => _availableMarkets;
+  Map<String, String> get selectedShippingForItems => _selectedShippingForItems;
+
+  // Obtener el shipping_id para un item_id
+  String? getShippingForItem(String itemId) {
+    return _selectedShippingForItems[itemId];
   }
 
-  String get selectedCountry {
-    debugPrint('Getting selected country: $_selectedCountry');
-    return _selectedCountry;
+  void updateShippingForItem(String itemId, String shippingId) {
+    _selectedShippingForItems[itemId] = shippingId;
+    notifyListeners();
+  }
+
+  void updateShippingForSupplier(List<String> itemIds, String shippingId) {
+    for (var itemId in itemIds) {
+      _selectedShippingForItems[itemId] = shippingId;
+    }
+    notifyListeners();
+  }
+
+  void clearShippingSelections() {
+    _selectedShippingForItems.clear();
+    notifyListeners();
   }
 
   String get cartId {
@@ -31,15 +53,36 @@ class AppState with ChangeNotifier {
     return _selectedScreen;
   }
 
-  void setSelectedCurrency(String currency) {
-    debugPrint('Setting selected currency: $currency');
-    _selectedCurrency = currency;
+  void initializeMarkets(List<Market> markets) {
+    _availableMarkets = markets;
+
+    final initialMarket = markets.isNotEmpty
+        ? markets.firstWhere(
+            (market) => market.code == _selectedCountry,
+            orElse: () => markets.first,
+          )
+        : null;
+    if (initialMarket != null) {
+      _selectedCountry = initialMarket.code;
+      _selectedCurrency = initialMarket.currency.code;
+      _selectedCurrencySymbol = initialMarket.currency.symbol;
+    } else {
+      _selectedCountry = '';
+      _selectedCurrency = '';
+      _selectedCurrencySymbol = '';
+    }
+
     notifyListeners();
   }
 
   void setSelectedCountry(String country) {
-    debugPrint('Setting selected country: $country');
     _selectedCountry = country;
+
+    final selectedMarket =
+        _availableMarkets.firstWhere((market) => market.code == country);
+    _selectedCurrency = selectedMarket.currency.code;
+    _selectedCurrencySymbol = selectedMarket.currency.symbol;
+
     notifyListeners();
   }
 

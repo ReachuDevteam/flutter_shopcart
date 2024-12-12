@@ -41,7 +41,8 @@ class ProductDetailButton extends StatelessWidget {
     // Here you make your service call to get the product detail..
     var product = await ProductQueries.executeChannelGetProductQuery(
         client, productId,
-        currency: appState.selectedCurrency);
+        currency: appState.selectedCurrency,
+        shippingCountryCode: appState.selectedCountry);
 
     // Show the product detail in a modal sheet.
     showModalBottomSheet(

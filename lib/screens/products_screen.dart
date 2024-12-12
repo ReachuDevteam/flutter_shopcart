@@ -30,10 +30,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     final AppState appState = Provider.of<AppState>(context, listen: false);
     setState(() {
-      _productsFuture = ProductQueries.executeChannelGetProductsQuery(
-        client,
-        currency: appState.selectedCurrency,
-      );
+      _productsFuture = ProductQueries.executeChannelGetProductsQuery(client,
+          currency: appState.selectedCurrency,
+          shippingCountryCode: appState.selectedCountry);
     });
   }
 

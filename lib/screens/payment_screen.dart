@@ -1,4 +1,3 @@
-import 'package:demo2/models/cartItem.dart';
 import 'package:demo2/widgets/klarna_widget.dart';
 import 'package:demo2/widgets/stripe_widget.dart';
 import 'package:flutter/material.dart';
@@ -46,8 +45,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
     final checkoutState = appState.checkoutState;
-    double total = calculateTotalPrice(appState.cartItems);
-    String currency = getCurrency(appState.cartItems);
+    print(checkoutState['totals']);
+    double total = (checkoutState['totals']['total'] as num).toDouble();
+    String currency = appState.selectedCurrencySymbol;
 
     final email = checkoutState['email'] ?? 'No email provided';
     final billingAddressInfo = {
@@ -100,18 +100,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 },
               ),
             ),
-            ListTile(
-              title: const Text('Stripe'),
-              leading: Radio<PaymentProvider>(
-                value: PaymentProvider.stripe,
-                groupValue: _selectedProvider,
-                onChanged: (PaymentProvider? value) {
-                  setState(() {
-                    _selectedProvider = value;
-                  });
-                },
-              ),
-            ),
+            // ListTile(
+            //   title: const Text('Stripe'),
+            //   leading: Radio<PaymentProvider>(
+            //     value: PaymentProvider.stripe,
+            //     groupValue: _selectedProvider,
+            //     onChanged: (PaymentProvider? value) {
+            //       setState(() {
+            //         _selectedProvider = value;
+            //       });
+            //     },
+            //   ),
+            // ),
             if (_selectedProvider == PaymentProvider.stripe)
               StripePaymentCardWidget(
                 email: email,
@@ -128,25 +128,5 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
       ),
     );
-  }
-
-  double calculateTotalPrice(List<CartItem> cartItems) {
-    double totalPrice = 0.0;
-
-    // Add the total price of all products in the cart
-    for (var item in cartItems) {
-      totalPrice += item.quantity * item.unitPrice;
-    }
-
-    return totalPrice;
-  }
-
-  String getCurrency(List<CartItem> cartItems) {
-    //  Gets the currency of the first item in the cartItems list
-    if (cartItems.isNotEmpty) {
-      return cartItems.first.currency;
-    } else {
-      return ''; // If there are no items in the cart, returns an empty string.
-    }
   }
 }

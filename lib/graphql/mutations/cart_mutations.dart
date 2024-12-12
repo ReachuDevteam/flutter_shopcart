@@ -2,9 +2,9 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 class CartMutations {
   static const String createCartMutation = """
-    mutation CreateCart(\$customerSessionId: String!, \$currency: String!) {
+    mutation CreateCart(\$customerSessionId: String!, \$currency: String!, \$shippingCountry: String) {
       Cart {
-        CreateCart(customer_session_id: \$customerSessionId, currency: \$currency) {
+        CreateCart(customer_session_id: \$customerSessionId, currency: \$currency, shipping_country: \$shippingCountry) {
       cart_id
       customer_session_id
       shipping_country
@@ -150,12 +150,14 @@ class CartMutations {
   static Future<Map<String, dynamic>?> executeCreateCartMutation(
       GraphQLClient client,
       {required String customerSessionId,
-      required String currency}) async {
+      required String currency,
+      String? shippingCountry}) async {
     final MutationOptions options = MutationOptions(
       document: gql(createCartMutation),
       variables: {
         'customerSessionId': customerSessionId,
         'currency': currency,
+        'shippingCountry': shippingCountry
       },
     );
 

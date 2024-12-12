@@ -32,11 +32,6 @@ class _ProductItemState extends State<ProductItem> {
           {
             'product_id': cartItem.productId,
             'quantity': cartItem.quantity,
-            "price_data": {
-              "currency": appState.selectedCurrency,
-              "tax": 0,
-              "unit_price": cartItem.unitPrice,
-            },
           }
         ],
       );
