@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
-import '../graphql/queries/product_queries.dart';
 import '../models/product.dart';
 import '../widgets/product_item.dart';
 import '../state/app_state.dart';
+import '../services/sdk.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -19,22 +18,24 @@ class _ProductsScreenState extends State<ProductsScreen> {
   @override
   void initState() {
     super.initState();
-    _productsFuture = Future.value([]);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadProducts();
-    });
+    _productsFuture = _loadProducts();
   }
 
-  void _loadProducts() {
-    final GraphQLClient client = GraphQLProvider.of(context).value;
-    final AppState appState = Provider.of<AppState>(context, listen: false);
-    setState(() {
-      _productsFuture = ProductQueries.executeChannelGetProductsQuery(
-        client,
+  Future<List<Product>> _loadProducts() async {
+    try {
+      final appState = Provider.of<AppState>(context, listen: false);
+
+      final sdk = SdkService().sdk;
+
+      final result = await sdk.channel.product.get(
         currency: appState.selectedCurrency,
       );
-    });
+
+      return result.map((e) => Product.fromJson(e.toJson())).toList();
+    } catch (e) {
+      debugPrint("Error fetching products: $e");
+      rethrow;
+    }
   }
 
   @override
@@ -50,7 +51,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-                child: Text('Error fetching products: ${snapshot.error}'));
+              child: Text('Error fetching products: ${snapshot.error}'),
+            );
           } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             final products = snapshot.data!;
             return ListView.builder(

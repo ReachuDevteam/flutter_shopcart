@@ -27,13 +27,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(title,
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-            Divider(),
+                style: const TextStyle(
+                    fontSize: 18.0, fontWeight: FontWeight.bold)),
+            const Divider(),
             ...info.entries.map(
               (entry) => Padding(
                 padding: const EdgeInsets.only(top: 4.0),
                 child: Text("${entry.key}: ${entry.value}",
-                    style: TextStyle(fontSize: 16.0)),
+                    style: const TextStyle(fontSize: 16.0)),
               ),
             ),
           ],
@@ -46,30 +47,29 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
     final checkoutState = appState.checkoutState;
-    double total = calculateTotalPrice(appState.cartItems);
-    String currency = getCurrency(appState.cartItems);
+    final total = _calculateTotalPrice(appState.cartItems);
+    final currency = _getCurrency(appState.cartItems);
 
     final email = checkoutState['email'] ?? 'No email provided';
+    final billing = checkoutState['billingAddress'] ?? const {};
+    final shipping = checkoutState['shippingAddress'] ?? const {};
+
     final billingAddressInfo = {
-      "Name":
-          "${checkoutState['billingAddress']['first_name']} ${checkoutState['billingAddress']['last_name']}",
-      "Phone": checkoutState['billingAddress']['phone'],
-      "Address":
-          "${checkoutState['billingAddress']['address1']}, ${checkoutState['billingAddress']['address2']}",
-      "City": checkoutState['billingAddress']['city'],
-      "Zip": checkoutState['billingAddress']['zip'],
-      "Country": checkoutState['billingAddress']['country']
+      "Name": "${billing['first_name']} ${billing['last_name']}",
+      "Phone": billing['phone'],
+      "Address": "${billing['address1']}, ${billing['address2']}",
+      "City": billing['city'],
+      "Zip": billing['zip'],
+      "Country": billing['country'],
     };
 
     final shippingAddressInfo = {
-      "Name":
-          "${checkoutState['shippingAddress']['first_name']} ${checkoutState['shippingAddress']['last_name']}",
-      "Phone": checkoutState['shippingAddress']['phone'],
-      "Address":
-          "${checkoutState['shippingAddress']['address1']}, ${checkoutState['shippingAddress']['address2']}",
-      "City": checkoutState['shippingAddress']['city'],
-      "Zip": checkoutState['shippingAddress']['zip'],
-      "Country": checkoutState['shippingAddress']['country']
+      "Name": "${shipping['first_name']} ${shipping['last_name']}",
+      "Phone": shipping['phone'],
+      "Address": "${shipping['address1']}, ${shipping['address2']}",
+      "City": shipping['city'],
+      "Zip": shipping['zip'],
+      "Country": shipping['country'],
     };
 
     return Scaffold(
@@ -82,11 +82,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Contact Email: $email',
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+                style: const TextStyle(
+                    fontSize: 18.0, fontWeight: FontWeight.bold)),
             buildInfoCard("Billing Address", billingAddressInfo),
             buildInfoCard("Shipping Address", shippingAddressInfo),
-            SizedBox(height: 20),
-            Text('Select Payment Provider:',
+            const SizedBox(height: 20),
+            const Text('Select Payment Provider:',
                 style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
             ListTile(
               title: const Text('Klarna'),
@@ -94,9 +95,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 value: PaymentProvider.klarna,
                 groupValue: _selectedProvider,
                 onChanged: (PaymentProvider? value) {
-                  setState(() {
-                    _selectedProvider = value;
-                  });
+                  setState(() => _selectedProvider = value);
                 },
               ),
             ),
@@ -106,9 +105,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 value: PaymentProvider.stripe,
                 groupValue: _selectedProvider,
                 onChanged: (PaymentProvider? value) {
-                  setState(() {
-                    _selectedProvider = value;
-                  });
+                  setState(() => _selectedProvider = value);
                 },
               ),
             ),
@@ -130,23 +127,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  double calculateTotalPrice(List<CartItem> cartItems) {
+  double _calculateTotalPrice(List<CartItem> cartItems) {
     double totalPrice = 0.0;
-
-    // Add the total price of all products in the cart
     for (var item in cartItems) {
       totalPrice += item.quantity * item.unitPrice;
     }
-
     return totalPrice;
   }
 
-  String getCurrency(List<CartItem> cartItems) {
-    //  Gets the currency of the first item in the cartItems list
-    if (cartItems.isNotEmpty) {
-      return cartItems.first.currency;
-    } else {
-      return ''; // If there are no items in the cart, returns an empty string.
-    }
+  String _getCurrency(List<CartItem> cartItems) {
+    return cartItems.isNotEmpty ? cartItems.first.currency : '';
   }
 }

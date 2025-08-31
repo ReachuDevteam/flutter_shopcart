@@ -1,9 +1,9 @@
-import 'package:demo2/graphql/mutations/cartItems_mutations.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
+
 import '../state/app_state.dart';
 import '../models/cartItem.dart';
+import '../services/sdk.dart'; // <- usa tu singleton del reachu_flutter_sdk
 
 class CartSummaryWidget extends StatelessWidget {
   const CartSummaryWidget({super.key});
@@ -11,58 +11,56 @@ class CartSummaryWidget extends StatelessWidget {
   Future<void> _handleRemoveFromCartItem(
       BuildContext context, String cartItemId) async {
     final appState = Provider.of<AppState>(context, listen: false);
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    final sdk = SdkService().sdk;
 
     try {
-      var result = await CartItemMutations.removeItemFromCart(
-        client,
-        appState.cartId,
-        cartItemId,
+      // SDK: eliminar item del carrito
+      await sdk.cart.deleteItem(
+        cart_id: appState.cartId,
+        cart_item_id: cartItemId,
       );
 
-      if (result != null) {
-        appState.removeCartItem(cartItemId);
-      } else {
-        // If result is null, we handle the case as an error.
-        throw Exception("Error removing product from cart: result is null");
-      }
+      // Mantener misma lógica local
+      appState.removeCartItem(cartItemId);
     } catch (e) {
-      // Here you catch any exceptions that occur during the API call or result processing.
-      print(e); // Log for debugging
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text("Error removing product from cart: ${e.toString()}")),
-      );
+      // Log y feedback
+      // ignore: avoid_print
+      print(e);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text("Error removing product from cart: ${e.toString()}")),
+        );
+      }
     }
   }
 
   Future<void> _handleUpdateFromCart(
       BuildContext context, String cartItemId, int qty) async {
     final appState = Provider.of<AppState>(context, listen: false);
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    final sdk = SdkService().sdk;
 
     try {
-      var result = await CartItemMutations.updateItemToCart(
-        client,
-        appState.cartId,
-        cartItemId,
-        qty: qty,
+      // SDK: actualizar cantidad del item
+      await sdk.cart.updateItem(
+        cart_id: appState.cartId,
+        cart_item_id: cartItemId,
+        quantity: qty,
       );
 
-      if (result != null) {
-        appState.updateCartItemQuantity(cartItemId, qty);
-      } else {
-        // If result is null, we handle the case as an error.
-        throw Exception("Error updating product in cart: result is null");
-      }
+      // Mantener misma lógica local
+      appState.updateCartItemQuantity(cartItemId, qty);
     } catch (e) {
-      // Here you catch any exceptions that occur during the API call or result processing.
-      print(e); // Log for debugging
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                "Error updating the product in the cart: ${e.toString()}")),
-      );
+      // ignore: avoid_print
+      print(e);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  "Error updating the product in the cart: ${e.toString()}")),
+        );
+      }
     }
   }
 
@@ -70,8 +68,10 @@ class CartSummaryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
-        double subtotal = appState.cartItems.fold(0,
-            (total, current) => total + (current.unitPrice * current.quantity));
+        final subtotal = appState.cartItems.fold<double>(
+          0,
+          (total, current) => total + (current.unitPrice * current.quantity),
+        );
 
         return Column(
           children: [
@@ -82,7 +82,8 @@ class CartSummaryWidget extends StatelessWidget {
                     leading: Image.network(cartItem.image),
                     title: Text(cartItem.title),
                     subtitle: Text(
-                        '${cartItem.quantity} x ${cartItem.unitPrice.toStringAsFixed(2)} ${appState.selectedCurrency}'),
+                      '${cartItem.quantity} x ${cartItem.unitPrice.toStringAsFixed(2)} ${appState.selectedCurrency}',
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -91,9 +92,10 @@ class CartSummaryWidget extends StatelessWidget {
                           onPressed: cartItem.quantity > 1
                               ? () async {
                                   await _handleUpdateFromCart(
-                                      context,
-                                      cartItem.cartItemId,
-                                      cartItem.quantity - 1);
+                                    context,
+                                    cartItem.cartItemId,
+                                    cartItem.quantity - 1,
+                                  );
                                 }
                               : null,
                         ),
@@ -101,19 +103,24 @@ class CartSummaryWidget extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.add),
                           onPressed: () async {
-                            await _handleUpdateFromCart(context,
-                                cartItem.cartItemId, cartItem.quantity + 1);
+                            await _handleUpdateFromCart(
+                              context,
+                              cartItem.cartItemId,
+                              cartItem.quantity + 1,
+                            );
                           },
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () async {
                             await _handleRemoveFromCartItem(
-                                context, cartItem.cartItemId);
+                              context,
+                              cartItem.cartItemId,
+                            );
 
-                            if (appState.cartItems.isEmpty) {
-                              Navigator.pop(
-                                  context); //  Closes the cart summary if it is empty
+                            if (appState.cartItems.isEmpty && context.mounted) {
+                              // cierra el resumen si queda vacío
+                              Navigator.pop(context);
                             }
                           },
                         ),
@@ -130,12 +137,15 @@ class CartSummaryWidget extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Subtotal:',
-                      style: TextStyle(
-                          fontSize: 18.0, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Subtotal:',
+                    style:
+                        TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                  ),
                   Text(
-                      '${subtotal.toStringAsFixed(2)} ${appState.selectedCurrency}',
-                      style: const TextStyle(fontSize: 18.0)),
+                    '${subtotal.toStringAsFixed(2)} ${appState.selectedCurrency}',
+                    style: const TextStyle(fontSize: 18.0),
+                  ),
                 ],
               ),
             ),
@@ -145,12 +155,15 @@ class CartSummaryWidget extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Total:',
-                      style: TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Total:',
+                    style:
+                        TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                  ),
                   Text(
-                      '${subtotal.toStringAsFixed(2)} ${appState.selectedCurrency}',
-                      style: const TextStyle(fontSize: 20.0)),
+                    '${subtotal.toStringAsFixed(2)} ${appState.selectedCurrency}',
+                    style: const TextStyle(fontSize: 20.0),
+                  ),
                 ],
               ),
             ),

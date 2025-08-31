@@ -1,9 +1,8 @@
-import 'package:demo2/graphql/mutations/checkout_mutations.dart';
 import 'package:demo2/state/app_state.dart';
+import 'package:demo2/services/sdk.dart'; // ✅ usa el SDK
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 
 class StripePaymentCardWidget extends StatefulWidget {
@@ -33,17 +32,23 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
   }
 
   Future<void> initPaymentSheet() async {
-    AppState appState = Provider.of<AppState>(context, listen: false);
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    final appState = Provider.of<AppState>(context, listen: false);
+    final sdk = SdkService().sdk;
 
-    String checkoutId = appState.checkoutState['id'];
+    final String checkoutId = appState.checkoutState['id'];
 
     try {
-      final result = await CheckoutMutations.checkoutPaymentIntentStripe(
-          client, checkoutId, true);
+      // ✅ Migración: usamos el SDK en lugar de CheckoutMutations + GraphQL
+      final intent = await sdk.payment.stripeIntent(
+        checkoutId: checkoutId,
+        returnEphemeralKey: true, // igual que antes
+      );
 
-      if (result != null) {
-        final clientSecret = result['client_secret'];
+      if (intent != null) {
+        final clientSecret = intent.clientSecret;
+        if (clientSecret == null || clientSecret.isEmpty) {
+          throw Exception('Could not obtain the clientSecret');
+        }
         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
             paymentIntentClientSecret: clientSecret,
@@ -51,10 +56,17 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
           ),
         );
       } else {
+        // ignore: avoid_print
         print("Could not obtain the clientSecret");
       }
     } catch (e) {
+      // ignore: avoid_print
       print("Error when initializing the PaymentSheet: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Stripe init error: $e')),
+        );
+      }
     }
   }
 
@@ -68,13 +80,15 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
       setState(() {
         paymentSuccess = false;
       });
+      // ignore: avoid_print
+      print("Error presenting PaymentSheet: $e");
     }
   }
 
   Widget paymentStatusWidget() {
-    if (paymentSuccess == null) return SizedBox.shrink();
+    if (paymentSuccess == null) return const SizedBox.shrink();
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: paymentSuccess! ? Colors.green : Colors.red,
         borderRadius: BorderRadius.circular(12),
@@ -87,10 +101,10 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
             color: Colors.white,
             size: 24,
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Text(
             paymentSuccess! ? "Successful payment" : "Failed payment",
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ],
@@ -98,10 +112,11 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         children: [
           ElevatedButton(
@@ -114,13 +129,14 @@ class _StripePaymentCardWidgetState extends State<StripePaymentCardWidget> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blueAccent,
               foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              textStyle:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             child: Text(
                 'Pay ${widget.currency} ${widget.totalAmount.toStringAsFixed(2)}'),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           paymentStatusWidget(),
         ],
       ),

@@ -1,10 +1,9 @@
 import 'package:demo2/state/app_state.dart';
+import 'package:demo2/services/sdk.dart'; // <- SDK singleton
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:demo2/graphql/mutations/checkout_mutations.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class KlarnaPaymentCardWidget extends StatefulWidget {
   final String email;
@@ -35,34 +34,35 @@ class _KlarnaPaymentCardWidgetState extends State<KlarnaPaymentCardWidget> {
   }
 
   Future<void> fetchKlarnaHtmlSnippet() async {
-    AppState appState = Provider.of<AppState>(context, listen: false);
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    final appState = Provider.of<AppState>(context, listen: false);
+    final sdk = SdkService().sdk;
 
     final email = widget.email;
-    String checkoutId = appState.checkoutState['id'];
+    final String checkoutId = appState.checkoutState['id'];
 
     try {
-      var result = await CheckoutMutations.checkoutInitPaymentKlarna(
-        client,
-        checkoutId,
-        appState.selectedCountry.toUpperCase(),
-        dotenv.env['FAKE_RETURN_URL']!,
-        email,
+      // ✅ Migración: usamos SDK en lugar de CheckoutMutations + GraphQLClient
+      final dto = await sdk.payment.klarnaInit(
+        checkoutId: checkoutId,
+        countryCode: appState.selectedCountry.toUpperCase(),
+        href: dotenv.env['FAKE_RETURN_URL']!, // misma URL de retorno
+        email: email,
       );
 
-      if (result != null && result["order_id"] != null) {
+      if (dto != null && dto.orderId.isNotEmpty) {
         setState(() {
-          orderId = result["order_id"];
+          orderId = dto.orderId;
           url =
-              '${dotenv.env['REACHU_SERVER_URL']}/api/checkout/${checkoutId}/payment-klarna-html-body';
-        });
-
-        setState(() {
+              '${dotenv.env['REACHU_SERVER_URL']}/api/checkout/$checkoutId/payment-klarna-html-body';
           showWebView = true;
         });
       }
     } catch (e) {
       print("Error fetching Klarna HTML snippet: $e");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Klarna error: $e')),
+      );
     }
   }
 
@@ -109,7 +109,7 @@ class _KlarnaPaymentCardWidgetState extends State<KlarnaPaymentCardWidget> {
               : Container(),
           if (paymentSuccess == true)
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.green,
                 borderRadius: BorderRadius.circular(12),

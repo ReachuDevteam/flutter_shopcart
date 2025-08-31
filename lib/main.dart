@@ -1,6 +1,8 @@
+import 'package:demo2/services/sdk.dart';
+import 'package:demo2/screens/products_screen.dart';
+import 'package:demo2/screens/shipping_selection_screen.dart';
 import 'package:demo2/screens/checkout_screen.dart';
 import 'package:demo2/screens/payment_screen.dart';
-import 'package:demo2/screens/products_screen.dart';
 import 'package:demo2/widgets/cart_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -10,7 +12,6 @@ import 'package:uuid/uuid.dart';
 import './graphql/graphql_client.dart';
 import './state/app_state.dart';
 import 'conts/data.dart';
-import './graphql/mutations/cart_mutations.dart';
 
 void main() async {
   var uuid = const Uuid();
@@ -22,18 +23,22 @@ void main() async {
   final ValueNotifier<GraphQLClient> client =
       GraphQLConfiguration.clientToQuery();
 
-  String? cartId = await CartMutations.executeCreateCartMutation(
-    client.value, // The GraphQL client
-    customerSessionId: generatedUuid,
-    currency: CURRENCY_INIT,
-  ).then((result) => result?['cart_id']);
+  SdkService().init(
+    baseUrl: dotenv.env['GRAPHQL_SERVER_URL']!,
+    apiKey: dotenv.env['API_TOKEN']!,
+  );
+
+  final created = await SdkService().sdk.cart.create(
+      customer_session_id: generatedUuid,
+      currency: CURRENCY_INIT,
+      shippingCountry: COUNTRY_INIT.toUpperCase());
 
   runApp(
     ChangeNotifierProvider(
       create: (context) {
         AppState appState = AppState();
-        if (cartId != null) {
-          appState.setCartId(cartId);
+        if (created.cartId != null) {
+          appState.setCartId(created.cartId);
         }
         return appState;
       },
@@ -89,12 +94,14 @@ class _HomeScreenState extends State<HomeScreen> {
     'USD': Icons.attach_money,
     'EUR': Icons.euro_symbol,
     'NOK': Icons.money,
+    'GBP': Icons.money,
   };
 
   void _onItemTapped(int index) {
     final appState = Provider.of<AppState>(context, listen: false);
 
-    if ((index == 1 || index == 2) && appState.cartItems.isEmpty) {
+    if ((index == 2 || index == 3 || index == 4) &&
+        appState.cartItems.isEmpty) {
       // Display a message indicating that the cart is empty
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -174,6 +181,10 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Products',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.local_shipping),
+            label: 'Shipping',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag),
             label: 'Checkout',
           ),
@@ -185,12 +196,14 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
 
   final List<Widget> _widgetOptions = <Widget>[
     const ProductsScreen(),
+    const ShippingSelectionScreen(),
     const CheckoutScreen(),
     const PaymentScreen(),
   ];

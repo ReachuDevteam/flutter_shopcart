@@ -1,15 +1,15 @@
-import 'package:demo2/graphql/mutations/cartItems_mutations.dart';
-import 'package:demo2/widgets/product_detail_button.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../models/cartItem.dart';
 import '../state/app_state.dart';
+import '../services/sdk.dart';
+import '../widgets/product_detail_button.dart';
+
+import 'package:reachu_flutter_sdk/reachu_flutter_sdk.dart' show LineItemInput;
 
 class ProductItem extends StatefulWidget {
   final Product product;
-
   const ProductItem({super.key, required this.product});
 
   @override
@@ -20,74 +20,72 @@ class _ProductItemState extends State<ProductItem> {
   int _quantity = 1;
 
   Future<void> _handleAddToCartItem(
-      BuildContext context, CartItem cartItem) async {
+    BuildContext context,
+    CartItem cartItem,
+  ) async {
     final appState = Provider.of<AppState>(context, listen: false);
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    final sdk = SdkService().sdk;
 
     try {
-      var result = await CartItemMutations.createItemToCart(
-        client,
-        appState.cartId,
-        [
-          {
-            'product_id': cartItem.productId,
-            'quantity': cartItem.quantity,
-            "price_data": {
-              "currency": appState.selectedCurrency,
-              "tax": 0,
-              "unit_price": cartItem.unitPrice,
-            },
-          }
-        ],
+      final inputs = <LineItemInput>[
+        LineItemInput(
+          productId: cartItem.productId,
+          quantity: cartItem.quantity,
+        ),
+      ];
+
+      final updated = await sdk.cart.addItem(
+        cart_id: appState.cartId,
+        line_items: inputs, // <- lista tipada
       );
 
-      if (result != null) {
-        final matchingLineItem = result['line_items'].firstWhere(
-          (item) => item['product_id'] == cartItem.productId,
-          orElse: () => null,
-        );
-        if (matchingLineItem != null) {
-          cartItem.cartItemId = matchingLineItem['id'];
-          appState.addCartItem(cartItem);
-        }
-      } else {
-        throw Exception("Product could not be added to cart.");
-      }
-    } catch (e) {
-      // Optional: print the error in the console for debugging purposes
-      print(e);
+      final added = updated.lineItems.firstWhere(
+        (li) => li.productId == cartItem.productId,
+        orElse: () => updated.lineItems.isNotEmpty
+            ? updated.lineItems.last
+            : updated.lineItems.first,
+      );
+
+      cartItem.cartItemId = added.id;
+      appState.addCartItem(cartItem);
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content:
-                Text("Error adding product to cart. Please try again later")),
+        const SnackBar(content: Text('Product added to cart')),
+      );
+    } catch (e) {
+      debugPrint('Add to cart error: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error adding product to cart')),
       );
     }
   }
 
   Future<void> _handleRemoveFromCartItem(
-      BuildContext context, String cartItemId) async {
+    BuildContext context,
+    String cartItemId,
+  ) async {
     final appState = Provider.of<AppState>(context, listen: false);
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    final sdk = SdkService().sdk;
 
     try {
-      var result = await CartItemMutations.removeItemFromCart(
-        client,
-        appState.cartId,
-        cartItemId,
+      await sdk.cart.deleteItem(
+        cart_id: appState.cartId,
+        cart_item_id: cartItemId,
       );
 
-      if (result != null) {
-        appState.removeCartItem(cartItemId);
-      } else {
-        // If result is null, we handle the case as an error.
-        throw Exception("Error removing product from cart: result is null");
-      }
-    } catch (e) {
-      // Here you catch any exceptions that occur during the API call or result processing.
-      print(e); // Log for debugging
+      appState.removeCartItem(cartItemId);
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text("Error removing product from cart: ${e.toString()}")),
+        const SnackBar(content: Text('Product removed from cart')),
+      );
+    } catch (e) {
+      debugPrint('Remove from cart error: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error removing product: $e')),
       );
     }
   }
@@ -97,6 +95,7 @@ class _ProductItemState extends State<ProductItem> {
     final appState = Provider.of<AppState>(context);
     final isInCart =
         appState.cartItems.any((item) => item.productId == widget.product.id);
+
     CartItem? cartItem;
     if (isInCart) {
       cartItem = appState.cartItems
@@ -117,10 +116,7 @@ class _ProductItemState extends State<ProductItem> {
             ),
             Text(
               widget.product.title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             Text('${widget.product.currencyCode} ${widget.product.price}'),
             Row(
@@ -136,40 +132,40 @@ class _ProductItemState extends State<ProductItem> {
                           }
                         },
                 ),
-                Text(isInCart ? cartItem!.quantity.toString() : '$_quantity',
-                    style: const TextStyle(fontSize: 18)),
+                Text(
+                  isInCart ? cartItem!.quantity.toString() : '$_quantity',
+                  style: const TextStyle(fontSize: 18),
+                ),
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline),
-                  onPressed: isInCart
-                      ? null
-                      : () {
-                          setState(() => _quantity++);
-                        },
+                  onPressed:
+                      isInCart ? null : () => setState(() => _quantity++),
                 ),
               ],
             ),
-            ProductDetailButton(
-                productId: widget
-                    .product.id), // Here you integrate your ProductDetailButton
+            ProductDetailButton(productId: widget.product.id),
             ElevatedButton(
               onPressed: () async {
                 if (isInCart) {
                   await _handleRemoveFromCartItem(
-                      context, cartItem!.cartItemId);
+                    context,
+                    cartItem!.cartItemId,
+                  );
                 } else {
-                  CartItem _cartItem = CartItem(
-                      title: widget.product.title,
-                      currency: appState.selectedCurrency,
-                      productId: widget.product.id,
-                      quantity: _quantity,
-                      unitPrice: widget.product.price,
-                      tax: 0,
-                      image: widget.product.imageUrl,
-                      productShipping: widget.product.productShipping,
-                      cartItemId: "");
-                  await _handleAddToCartItem(context, _cartItem);
+                  final newItem = CartItem(
+                    title: widget.product.title,
+                    currency: appState.selectedCurrency,
+                    productId: widget.product.id,
+                    quantity: _quantity,
+                    unitPrice: widget.product.price,
+                    tax: 0,
+                    image: widget.product.imageUrl,
+                    productShipping: widget.product.productShipping,
+                    cartItemId: '',
+                  );
+                  await _handleAddToCartItem(context, newItem);
                 }
-                setState(() {});
+                if (mounted) setState(() {});
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor:

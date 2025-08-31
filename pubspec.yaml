@@ -37,7 +37,7 @@ dependencies:
   webview_flutter: ^2.0.12
   flutter_stripe: 10.0.0
   flutter_html: ^3.0.0-beta.2 # Usa la última versión que sea compatible
-
+  reachu_flutter_sdk: ^0.0.1
 
 
 
@@ -56,6 +56,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
+
+dependency_overrides:
+  win32: ">=5.5.1 <5.14.0"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
