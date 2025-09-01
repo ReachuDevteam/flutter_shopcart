@@ -37,7 +37,7 @@ dependencies:
   webview_flutter: ^2.0.12
   flutter_stripe: 10.0.0
   flutter_html: ^3.0.0-beta.2 # Usa la última versión que sea compatible
-  reachu_flutter_sdk: ^0.0.1
+  reachu_flutter_sdk: ^1.0.0
 
 
 

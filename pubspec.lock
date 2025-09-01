@@ -476,10 +476,10 @@ packages:
     dependency: "direct main"
     description:
       name: reachu_flutter_sdk
-      sha256: e3eee23c8294a3cdd515b4f135178914a09636e75fb1baad4c6369e174fc7b3f
+      sha256: b4ed59936ea42a158cef31cfc2e4c24ff410e70760240008c4db1e51a001b34f
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "1.0.0"
   rxdart:
     dependency: transitive
     description:

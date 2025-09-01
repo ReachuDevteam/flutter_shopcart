@@ -33,6 +33,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     },
   };
 
+  String _toKey(String? code) => (code ?? 'no').toLowerCase();
+  String _toCode(String? key) => (key ?? 'no').toUpperCase();
+
   String email = '';
   Map<String, dynamic> billingAddress = {
     'first_name': '',
@@ -86,7 +89,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
       _sameAsBillingAddress =
           appState.checkoutState['sameAsBillingAddress'] ?? true;
-      _selectedCountryCode = billingAddress['countryCode'];
+
+      _selectedCountryCode = _toKey(billingAddress['countryCode'] as String?);
     } else {
       final mockBilling =
           Map<String, dynamic>.from(_MOCK_CHECKOUT['billingAddress'] as Map);
@@ -95,10 +99,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       billingAddress = mockBilling;
       shippingAddress = mockShipping;
       _sameAsBillingAddress = true;
-      _selectedCountryCode = mockBilling['countryCode'];
+
+      _selectedCountryCode = _toKey(mockBilling['countryCode'] as String?);
     }
 
-    _showStateField = countriesData[_selectedCountryCode]?['hasStates'] ?? true;
+    _showStateField =
+        countriesData[_selectedCountryCode]?['hasStates'] ?? false;
+
     _selectedState =
         (billingAddress['provinceCode']?.toString().isNotEmpty ?? false)
             ? billingAddress['provinceCode'] as String
@@ -107,19 +114,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     setState(() {});
   }
 
-  void _onCountryChanged(String? countryCode) {
+  void _onCountryChanged(String? countryKey) {
+    final key = _toKey(countryKey);
     setState(() {
-      _selectedCountryCode = countryCode;
-      _showStateField = countriesData[countryCode]?['hasStates'] ?? true;
+      _selectedCountryCode = key;
+      _showStateField = countriesData[key]?['hasStates'] ?? false;
 
-      billingAddress['countryCode'] = countryCode;
-      shippingAddress['countryCode'] = countryCode;
+      billingAddress['countryCode'] = _toCode(key);
+      shippingAddress['countryCode'] = _toCode(key);
 
-      billingAddress['country'] = countriesData[countryCode]?['name'];
-      shippingAddress['country'] = countriesData[countryCode]?['name'];
+      billingAddress['country'] = countriesData[key]?['name'];
+      shippingAddress['country'] = countriesData[key]?['name'];
 
-      _selectedState = countriesData[countryCode]?['states']?.isNotEmpty == true
-          ? (countriesData[countryCode]!['states'] as List).first.toString()
+      _selectedState = countriesData[key]?['states']?.isNotEmpty == true
+          ? (countriesData[key]!['states'] as List).first.toString()
           : null;
 
       billingAddress['province'] = _selectedState ?? '';
@@ -351,6 +359,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               COUNTRY_INIT)
           .toString()
           .toUpperCase();
+
       final selectedPhoneCode =
           countriesData[selectedCountryCode.toLowerCase()]['phoneCode'];
       final selectedCountryName =
